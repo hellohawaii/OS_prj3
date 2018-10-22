@@ -52,7 +52,7 @@ void lock_task1(void)
                 for (i = 0; i < 20; i++)
                 {
                         vt100_move_cursor(1, print_location);
-                        printk("> [TASK] 1 Has acquired lock and running.(%d)\n", i);
+                        printk("> [TASK] Has acquired lock and running.(%d)\n", i);
                         do_scheduler();
                 }
 
@@ -60,7 +60,7 @@ void lock_task1(void)
                 printk("%s", blank);
 
                 vt100_move_cursor(1, print_location);
-                printk("> [TASK] 1 Has acquired lock and exited.\n");
+                printk("> [TASK] Has acquired lock and exited.\n");
 
 #ifdef SPIN_LOCK
                 spin_lock_release(&spin_lock);
@@ -111,7 +111,7 @@ void lock_task2(void)
                 for (i = 0; i < 20; i++)
                 {
                         vt100_move_cursor(1, print_location);
-                        printk("> [TASK] 2 Has acquired lock and running.(%d)\n", i);
+                        printk("> [TASK] Has acquired lock and running.(%d)\n", i);
                         do_scheduler();
                 }
 
@@ -119,7 +119,7 @@ void lock_task2(void)
                 printk("%s", blank);
 
                 vt100_move_cursor(1, print_location);
-                printk("> [TASK] 2 Has acquired lock and exited.\n");
+                printk("> [TASK] Has acquired lock and exited.\n");
 
 #ifdef SPIN_LOCK
                 spin_lock_release(&spin_lock);

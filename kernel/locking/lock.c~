@@ -32,7 +32,7 @@ void do_mutex_lock_acquire(mutex_lock_t *lock)
         do_block(&block_queue);
         do_scheduler();
     }
-    lock->status=LOCKED;
+    lock->status==LOCKED;
 }
 
 void do_mutex_lock_release(mutex_lock_t *lock)
