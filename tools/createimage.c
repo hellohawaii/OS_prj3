@@ -5,62 +5,146 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+void write_bootblock(FILE *image, FILE *bbfile, Elf32_Phdr *Phdr);
+Elf32_Phdr *read_exec_file(FILE *opfile);
+uint8_t count_kernel_sectors(Elf32_Phdr *Phdr);
+void extent_opt(Elf32_Phdr *Phdr_bb, Elf32_Phdr *Phdr_k, int kernelsz);
 
-#define IMAGE_FILE "./image"
-#define ARGS "[--extended] [--vm] <bootblock> <executable-file> ..."
 
-#define SECTOR_SIZE 512
-#define OS_SIZE_LOC 2
-#define BOOT_LOADER_SIG_OFFSET 0x1fe
-#define BOOT_LOADER_SIG_1 0x55
-#define BOOT_LOADER_SIG_2 0xaa
-#define BOOT_MEM_LOC 0x7c00
-#define OS_MEM_LOC 0x1000
-
-/* structure to store command line options */
-static struct
+//fopen fwrite fread fseek
+Elf32_Phdr *read_exec_file(FILE *opfile)
 {
-    int vm;
-    int extended;
-} options;
-
-/* prototypes of local functions */
-static void create_image(int nfiles, char *files[]);
-static void error(char *fmt, ...);
-static void read_ehdr(Elf32_Ehdr *ehdr, FILE *fp);
-static void read_phdr(Elf32_Phdr *phdr, FILE *fp, int ph,
-                      Elf32_Ehdr ehdr);
-static void write_segment(Elf32_Ehdr ehdr, Elf32_Phdr phdr, FILE *fp,
-                          FILE *img, int *nbytes, int *first);
-static void write_os_size(int nbytes, FILE *img);
-
-int main(int argc, char **argv)
-{
+    //get e_phoff
+    fseek(opfile,28,0);//e_phoff is 28
+    Elf32_Off *e_phoff=(Elf32_Off *)malloc(sizeof(Elf32_Off));
+    fread(e_phoff,sizeof(Elf32_Off),1,opfile);
+    //get the header
+    fseek(opfile,*e_phoff,0);
+    Elf32_Phdr *file_header=(Elf32_Phdr *)malloc(sizeof(Elf32_Phdr));
+    fread(file_header,sizeof(Elf32_Phdr),1,opfile);
+    return file_header;
+    //TODO:what if there are more than one program header?
+    //perhaps need to return the size of the program header table and so on.
 }
 
-static void create_image(int nfiles, char *files[])
+uint8_t count_kernel_sectors(Elf32_Phdr *Phdr)
 {
+    //using the imformation of program segment header
+    //to get the sector number
+    //TODO:Also can't deal with the situation where there are more than one program header
+    char *p=((char *)Phdr +16);
+    Elf32_Word *p_memsz=(Elf32_Word *)p;
+    uint8_t sectors_num = *p_memsz / 512 +((*p_memsz % 512)>0)/*NOT ALWAYS PLUS ONE*/;
+    return sectors_num;
 }
 
-static void read_ehdr(Elf32_Ehdr *ehdr, FILE *fp)
+void write_bootblock(FILE *image, FILE *file, Elf32_Phdr *phdr)
 {
+    //different from write_kernel, add additional 0 at the end to fill up 512B
+    //TODO:what if there are more than one program header?
+    //TODO,what is the difference between p_filesz and p_memsz, which one should we use?
+    //move the flow of file to the segment
+    char *p=((char *)phdr + 4);
+    Elf32_Off *p_offset=(Elf32_Off *)p;
+    fseek(file,*p_offset,0);
+    //read the segment to a new space
+    char *q=((char *)phdr + 20);
+    Elf32_Word * p_filesz=(Elf32_Word *)q;
+    void *readresult=(void *)malloc(*p_filesz);
+    fread(readresult,sizeof(char),*p_filesz,file);
+    //copy these from the space to image
+    fwrite(readresult,sizeof(char),*p_filesz,image);
+    fflush(image);
+    //file the blank with zero;
+    int i=*p_filesz;
+    char zero[512];
+    int j;
+    for(j=0;j<512;j++)
+        zero[j]=0;
+    if(i<=512){
+        fwrite(zero,sizeof(char),512-i,image);
+        fflush(image);
+    }
+    //TODO:will this continue to write after whie bytes written before?
+    //(will the fwrite change the flow?)
 }
 
-static void read_phdr(Elf32_Phdr *phdr, FILE *fp, int ph,
-                      Elf32_Ehdr ehdr)
+void write_kernel(FILE *image, FILE *knfile, Elf32_Phdr *Phdr, int kernelsz)
 {
+    //TODO:why use EFL header？
+    //TODO:what if there are more than one program header?
+    //TODO,what is the difference between p_filesz and p_memsz, which one should we use?
+    //move the flow of file to the segment
+    char *p=((char *)Phdr + 4);
+    Elf32_Off *p_offset=(Elf32_Off *)p;
+    fseek(knfile,*p_offset,0);
+    //read the segment to a new space
+    char *q=((char *)Phdr + 20);
+    Elf32_Word * p_filesz=(Elf32_Word *)q;
+    void *readresult=(void *)malloc(*p_filesz);
+    fread(readresult,sizeof(char),*p_filesz,knfile);
+    //copy these from the space to image
+    //don't forget to leave 512B
+    fseek(image,512,0);
+    fwrite(readresult,sizeof(char),*p_filesz,image);
+    fflush(image);
+    //file the blank with zero;
+    int i=*p_filesz;
+    char zero[512];
+    int j;
+    for(j=0;j<512;j++)
+        zero[j]=0;
+    if(i<=512*kernelsz){
+        fwrite(zero,sizeof(char),512*kernelsz-i,image);
+        fflush(image);
+    }
+    //TODO:will this continue to write after whie bytes written before?
+    //(will the fwrite change the flow?)
 }
 
-static void write_segment(Elf32_Ehdr ehdr, Elf32_Phdr phdr, FILE *fp,
-                          FILE *img, int *nbytes, int *first)
+void record_kernel_sectors(FILE *image, uint8_t kernelsz)
 {
+    //write the uint8_t to somewhere in the image  
+    //write at the last
+    //do not know the size of unit8_t of this virtual machine, use sizeof()
+    uint8_t * p = (uint8_t *)image;
+    *(p+512/sizeof(uint8_t))=kernelsz;
+    fseek(image,512-sizeof(uint8_t),0);
+    fwrite(&kernelsz,sizeof(uint8_t),1,image);
+    fflush(image);
 }
 
-static void write_os_size(int nbytes, FILE *img)
+void extent_opt(Elf32_Phdr *Phdr_bb, Elf32_Phdr *Phdr_k, int kernelsz)
 {
+    //perhaps just print on the screen
+    //some extra infomation
+    char *q=((char *)Phdr_k + 16);
+    Elf32_Word * p_filesz=(Elf32_Word *)q;
+    printf("size of kernel is %d bytes\n",*p_filesz);
+    //TODO,what is the difference between p_filesz and p_memsz, which one should we use?
+    //TODO,the guide book ask to show which sector of the disk we are writing to and
+    //don't know what this mean.
+    printf("Total sector number:%d\n",kernelsz+1);
 }
 
-/* print an error message and exit */
-static void error(char *fmt, ...)
+
+//TODO:support the parser
+int main()
 {
+    //open files
+    FILE *file1_pointer=fopen("bootblock","rb+");
+    FILE *file2_pointer=fopen("main","rb+");
+    FILE *image_pointer=fopen("image","wb+");
+    //load the header
+    Elf32_Phdr *file1_header=read_exec_file(file1_pointer);
+    Elf32_Phdr *file2_header=read_exec_file(file2_pointer);
+    //count sectors of kernel
+    uint8_t num_kernel_sectors=count_kernel_sectors(file2_header);
+    //write bootblock and kernel
+    write_bootblock(image_pointer,file1_pointer,file1_header);
+    write_kernel(image_pointer,file2_pointer,file2_header,num_kernel_sectors);
+    //record kernel sectors
+    record_kernel_sectors(image_pointer,num_kernel_sectors);
+    //extent option
+    extent_opt(file1_header,file2_header,(int)num_kernel_sectors);
 }

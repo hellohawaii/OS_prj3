@@ -34,6 +34,38 @@
 
 static void init_pcb()
 {
+    //intialize the queue
+    queue_init(&ready_queue);
+    //store PCBs to the array
+    pcb[1].kernel_context.regs[29]=0xa0f00000;//sp
+    pcb[1].kernel_context.regs[31]=sched1_tasks[0]->entry_point;//ra
+    pcb[1].type=sched1_tasks[0]->type;
+    pcb[1].pid=1;
+    pcb[1].status=TASK_READY;
+    pcb[2].kernel_context.regs[29]=0xa0f10000;//sp
+    pcb[2].kernel_context.regs[31]=sched1_tasks[1]->entry_point;//ra
+    pcb[2].type=sched1_tasks[1]->type;
+    pcb[2].pid=2;
+    pcb[2].status=TASK_READY;
+    pcb[3].kernel_context.regs[29]=0xa0f20000;//sp
+    pcb[3].kernel_context.regs[31]=sched1_tasks[2]->entry_point;//ra
+    pcb[3].type=sched1_tasks[2]->type;
+    pcb[3].pid=3;
+    pcb[3].status=TASK_READY;
+    //move them to the ready queue
+    //modify the pointer in PCB, may not be necessary
+    //ready_queue.head=pcb+1;
+    //pcb[1].prev=NULL;
+    //pcb[1].next=pcb+2;
+    //pcb[2].prev=pcb+1;
+    //pcb[2].next=pcb+3;
+    //pcb[3].prev=pcb+2;
+    //pcb[3].next=NULL;
+    queue_push(&ready_queue,pcb+1);
+    queue_push(&ready_queue,pcb+2);
+    queue_push(&ready_queue,pcb+3);
+    //initial current_running here
+    current_running=pcb;
 }
 
 static void init_exception_handler()
@@ -83,7 +115,8 @@ void __attribute__((section(".entry_function"))) _start(void)
 	{
 		// (QAQQQQQQQQQQQ)
 		// If you do non-preemptive scheduling, you need to use it to surrender control
-		// do_scheduler();
+                //printk("looping...\n");
+		do_scheduler();
 	};
 	return;
 }

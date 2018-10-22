@@ -13,6 +13,9 @@ pcb_t *current_running;
 /* global process id */
 pid_t process_id = 1;
 
+//define the queue needed
+queue_t ready_queue;
+
 static void check_sleeping()
 {
 }
@@ -21,6 +24,14 @@ void scheduler(void)
 {
     // TODO schedule
     // Modify the current_running pointer.
+
+    //printk("running:scheduler\n");
+    //store old current_running
+    if(current_running!=pcb)//pcb[0] actually is not a process
+        queue_push(&ready_queue,current_running);
+
+    //get new current_running
+    current_running=queue_dequeue(&ready_queue);
 }
 
 void do_sleep(uint32_t sleep_time)
@@ -42,3 +53,4 @@ void do_unblock_all(queue_t *queue)
 {
     // unblock all task in the queue
 }
+

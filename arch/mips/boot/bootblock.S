@@ -2,13 +2,28 @@
 .global main
 
 main:
-	# use your own code in here!
-	# 1) call BIOS print string "It's bootblock!
-	# 2) call BIOS read kernel in SD card.
-	# 3) jump to kernel.
-# 4) while(1) --> stop here
+	# 1) task1 call BIOS print string "It's bootblock!"
+        #lui $a0,0xa080
+        #ori $a0,msg
+        #jal 0x8007b980  #perhaps printstr is the pointer which points to the number, just like msg
+        #(printstr)=0x8007b980
+	# 2) task2 call BIOS read kernel in SD card and jump to kernel start
+        lui $a0,0xa080
+        ori $a0,0x0200
+        xor $a1,$a1,$a1  #clear $a1
+        addiu $a1,$a1,0x200
+        lui $t0,0xa080
+        lb $t1,0x1ff($t0)#perhaps need to align
+        xor $t2,$t2
+        ori $t2,0x200
+        mul $a2,$t2,$t1
+        jal 0x8007b1cc
+        jal 0xa0800200 
+# while(1) --> stop here
+
 stop:
 	j stop
+
 .data
 
 msg: .ascii "It's a bootloader...\n"
