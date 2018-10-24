@@ -32,6 +32,7 @@
 #include "common.h"
 #include "syscall.h"
 
+#include "regs.h"
 static void init_pcb()
 {
 //the following codes are for task1
@@ -117,79 +118,26 @@ static void init_exception()
 {
     // 1. Get CP0_STATUS
     //only change part of CP_STATUS, perhaps this is the reason why we gets CP0_STATUS
-    int initial_STATUS;
+    uint32_t initial_STATUS;
     //can not use the reg name directly,$26 for k0,$27 for k1,$13 for CP0_CAUSE
     //$11 for CP0_COMPARE, $9 for CP0_COUNT, $12 for CP0_STATUS
-    asm volatile(
-        "mfc0 $27, $12\n\t"
-        "sw $27,%0\n\t"
-        :"=m"(initial_STATUS)
-        :
-        :"k0"
-    );
+    initial_STATUS=get_CP0_STATUS();
     printk("%d\n",initial_STATUS);
-/*only use regs
-    asm volatile(
-        "mfc0 k0, CP0_STATUS\n\t"
-        :
-        :
-        :"k0"
-    );
-*/
     // 2. Disable all interrupt
-    //int new_STATUS=initial_STATUS& 0xffff00ff;
-    //can not use the reg name directly,$26 for k0,$27 for k1,$13 for CP0_CAUSE
-    //$11 for CP0_COMPARE, $9 for CP0_COUNT, $12 for CP0_STATUS
-    asm(
-        //"lw $26,%0\n\t"
-        //"mtc0 $26, $12\n\t"
-        //:
-        //:"m"(new_STATUS)
-        //:"k0"
-
-        "mtc0 $0,$12"
-    );
-    //printk("%d\n",new_STATUS);
-/*only use regs
-    asm volatile(
-        "or k1,$0,0x111100111\n\t"
-        "or k0,k1,k0\n\t"
-        "mtc0 k0, CP0_STATUS\n\t"
-        :
-        :
-        :"k0","k1"
-    );
-*/
+    close_int();
     // 3. Copy the level 2 exception handling code to 0x80000180
-    printk("copying\n");
-    printk("size:%d\n",exception_handler_begin-exception_handler_end);
-    memcpy((void *)0x80000180,exception_handler_begin,exception_handler_end-exception_handler_begin);
-    printk("finish copying\n");
+    memcpy(BEV0_EBASE+BEV0_OFFSET,exception_handler_begin,exception_handler_end-exception_handler_begin);//irq.h define the macro
+    printk("hhhh\n");
     // 4. reset CP0_COMPARE & CP0_COUNT register
-    //can not use the reg name directly,$26 for k0,$27 for k1,$13 for CP0_CAUSE
-    //$11 for CP0_COMPARE, $9 for CP0_COUNT
-    //150000 is TIMER_INTERVAL
     asm volatile(
-        "add $26,$0,0x3a98\n\t"
+        "add $26,$0,0x3a98\n\t" // 150000 is TIMER_INTERVAL
         "mtc0 $26,$11\n\t"
         "mtc0 $0,$9\n\t"
     );
-    //printk("setting CP0_COMPARE and CP0_COUNT");
     //restore the CP0_STATUS and open interrupt
-    //int newest_STATUS=new_STATUS & 11110011;
-    //int newest_STATUS=0xffffffff;
-        asm(
-        //"add $26,$0,0xffffffff\n\t"
-        //"lw $26,%0\n\t"
-        //"mtc0 $26, $12\n\t"
-        //:
-        //:"m"(newest_STATUS)
-        //:"k0"
-        "li $26,0xffffffff\n\t"
-        "mtc0 $26, $12\n\t"
-    );
-    //printk("%d\n",newest_STATUS);
-    printk("STATUS:%x,COMPARE:%x,COUNT:%x\n",get_CP0_STATUS(),get_CP0_COMPARE(),get_CP0_COUNT());
+    set_CP0_STATUS(initial_STATUS & 0xffff80ff | 0x8000 | STATUS_CU0);
+    open_int();
+    //printk("STATUS:%x,COMPARE:%x,COUNT:%x\n",get_CP0_STATUS(),get_CP0_COMPARE(),get_CP0_COUNT());
 }
 
 static void init_syscall(void)
@@ -205,6 +153,10 @@ void __attribute__((section(".entry_function"))) _start(void)
 	// when making the exception vector entry copy
 	asm_start();
         printk("hello OS!\n");
+	// init Process Control Block (-_-!)
+	init_pcb();
+	printk("> [INIT] PCB initialization succeeded.\n");
+
 	// init interrupt (^_^)
 	init_exception();
 	printk("> [INIT] Interrupt processing initialization succeeded.\n");
@@ -213,16 +165,13 @@ void __attribute__((section(".entry_function"))) _start(void)
 	init_syscall();
 	printk("> [INIT] System call initialized successfully.\n");
 
-	// init Process Control Block (-_-!)
-	init_pcb();
-	printk("> [INIT] PCB initialization succeeded.\n");
-
 	// init screen (QAQ)
 	init_screen();
 	printk("> [INIT] SCREEN initialization succeeded.\n");
 
 	// TODO Enable interrupt
-	
+	//open_int();
+        printk(":-)\n");
 	while (1)
 	{
 		// (QAQQQQQQQQQQQ)
@@ -231,4 +180,12 @@ void __attribute__((section(".entry_function"))) _start(void)
 		do_scheduler();
 	};
 	return;
+}
+
+void show_int(void){
+    printk("now is handling interrupt\n");
+}
+
+void show_handle_int(void){
+    printk("now is show_handle_int\n");
 }

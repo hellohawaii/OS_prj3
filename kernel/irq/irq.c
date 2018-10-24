@@ -19,12 +19,11 @@ void interrupt_helper(uint32_t status, uint32_t cause)
     //void *p=irq_timer;
     //can not use the reg name directly,$26 for k0,$27 for k1,$13 for CP0_CAUSE
     //TODO, why can not? perhaps because these are defined by regs.h
-    asm volatile (
-        "mfc0 $26,$13\n\t"
-        "and $26,$26,0x00008000\n\t"
-        "or $26,$0,0x00008000\n\t"
-        "beq $26,$27,irq_timer\n\t"
-    );
+    uint32_t int_cause=get_CP0_CAUSE();
+    uint32_t event=cause & 0x0000ff00;
+    if(event==0x00008000)
+        irq_timer();
+    return;
     //in fact always jump to irq_timer, because now all interrupts are clock interrupts
 }
 

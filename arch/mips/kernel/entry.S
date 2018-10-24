@@ -3,10 +3,16 @@
 .equ    KERNEL, 0
 .equ    USER,   156
 
-.macro STI
+.macro STI //open interrupt
+    mfc0 k0, CP0_STATUS
+    or k0,0x1//IE=1
+    mtc0 k0, CP0_STATUS
 .endm
 
-.macro CLI
+.macro CLI //close interrupt
+    mfc0 k0, CP0_STATUS
+    and k0,0xfffffffe//IE=0
+    mtc0 k0, CP0_STATUS
 .endm
 
 LEAF(asm_start)
@@ -143,16 +149,14 @@ END(do_scheduler)
 
 NESTED(exception_handler_entry, 0, sp)   
 exception_handler_begin:
-    jal flag
+    //jal show_int
     // close interrupt
-    mfc0 k0, CP0_STATUS
-    or k1,$0,0xffff00ff
-    and k0,k1,k0//make IM be 0
-    mtc0 k0, CP0_STATUS
+    CLI
     //TODO,not sure, when should store the context
     //TODO:which special regs should be stored?
     SAVE_CONTEXT(KERNEL)
     // jmp exception_handler[i] which decided by CP0_CAUSE
+    jal show_int
     // decided by ExcCode field
     mfc0 k0,CP0_CAUSE
     and k0,$0
@@ -169,10 +173,7 @@ NESTED(handle_int, 0, sp)
     jal interrupt_helper
     RESTORE_CONTEXT(KERNEL)
     //open interrupt
-    mfc0 k0, CP0_STATUS
-    or k1,$0,0x0000ff00
-    or k0,k1,k0//make IM be 1
-    mtc0 k0, CP0_STATUS
+    STI
     // Leve3 exception Handler.
 END(handle_int)
 
@@ -184,7 +185,7 @@ NESTED(handle_other, 0, sp)
     // other exception handler
 END(handle_other)
 
-//used for debugging
+//get CP0
 LEAF(get_CP0_STATUS)
     mfc0 v0,CP0_STATUS
     jr ra
@@ -200,6 +201,28 @@ LEAF(get_CP0_COMPARE)
     jr ra
 END(get_CP0_COMPARE)
 
-LEAF(flag)
+LEAF(get_CP0_CAUSE)
+    mfc0 v0,CP0_CAUSE
     jr ra
-END(flag)
+END(get_CP0_CAUSE)
+
+//set_CP0
+LEAF(set_CP0_STATUS)
+    mtc0 a0,CP0_STATUS
+    jr ra
+END(set_CP0_STATUS)
+
+LEAF(open_int)
+    STI
+    jr ra
+END(open_int)
+
+LEAF(close_int)
+    CLI
+    jr ra
+END(close_int)
+
+
+//LEAF(flag)
+//    jr ra
+//END(flag)
