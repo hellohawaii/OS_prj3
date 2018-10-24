@@ -25,7 +25,7 @@ END(asm_start)
 .macro SAVE_CONTEXT offset
     // TODO save context
     lw k0,current_running
-    //not sure, if current_running is the addr of variable current_running
+    //TODO:not sure, if current_running is the addr of variable current_running
     //then should use lw. Or we should use la
     // now, t0 is current_running, i.e. the addr of current pcb
     //sw $1,4(k0)#seems that can not use at as register name
@@ -143,14 +143,36 @@ END(do_scheduler)
 
 NESTED(exception_handler_entry, 0, sp)   
 exception_handler_begin:
-    // TODO close interrupt
+    // close interrupt
+    mfc0 k0, CP0_STATUS
+    or k1,$0,0xffff00ff
+    and k0,k1,k0//make IM be 0
+    mtc0 k0, CP0_STATUS
+    //TODO,not sure, when should store the context
+    //TODO:which special regs should be stored?
+    SAVE_CONTEXT(KERNEL)
+    jal flag
     // jmp exception_handler[i] which decided by CP0_CAUSE
+    // decided by ExcCode field
+    mfc0 k0,CP0_CAUSE
+    and k0,$0
+    or k1,$0,$0
+    beq k0,k1,handle_int
+    //in fact always jump to handle_int, because now all exceptions are interrupt
     // Leve2 exception Handler.
 exception_handler_end:
 END(exception_handler_entry)
 
 NESTED(handle_int, 0, sp)
     // interrupt handler
+    //analysis the interrupt type by referring to interrupt_helper
+    jal interrupt_helper
+    RESTORE_CONTEXT(KERNEL)
+    //open interrupt
+    mfc0 k0, CP0_STATUS
+    or k1,$0,0x0000ff00
+    or k0,k1,k0//make IM be 1
+    mtc0 k0, CP0_STATUS
     // Leve3 exception Handler.
 END(handle_int)
 
@@ -162,4 +184,22 @@ NESTED(handle_other, 0, sp)
     // other exception handler
 END(handle_other)
 
+//used for debugging
+LEAF(get_CP0_STATUS)
+    mfc0 v0,CP0_STATUS
+    jr ra
+END(get_CP0_STATUS)
 
+LEAF(get_CP0_COUNT)
+    mfc0 v0,CP0_COUNT
+    jr ra
+END(get_CP0_COUNT)
+
+LEAF(get_CP0_COMPARE)
+    mfc0 v0,CP0_COMPARE
+    jr ra
+END(get_CP0_COMPARE)
+
+LEAF(flag)
+    jr ra
+END(flag)
