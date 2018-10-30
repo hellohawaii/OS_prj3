@@ -33,6 +33,10 @@
 #include "syscall.h"
 
 #include "regs.h"
+
+int int_time;
+int int_handle_time;
+
 static void init_pcb()
 {
 //the following codes are for task1
@@ -129,11 +133,7 @@ static void init_exception()
     memcpy(BEV0_EBASE+BEV0_OFFSET,exception_handler_begin,exception_handler_end-exception_handler_begin);//irq.h define the macro
     printk("hhhh\n");
     // 4. reset CP0_COMPARE & CP0_COUNT register
-    asm volatile(
-        "add $26,$0,0x3a98\n\t" // 150000 is TIMER_INTERVAL
-        "mtc0 $26,$11\n\t"
-        "mtc0 $0,$9\n\t"
-    );
+    reset_timer();
     //restore the CP0_STATUS and open interrupt
     set_CP0_STATUS(initial_STATUS & 0xffff80ff | 0x8000 | STATUS_CU0);
     open_int();
@@ -153,6 +153,8 @@ void __attribute__((section(".entry_function"))) _start(void)
 	// when making the exception vector entry copy
 	asm_start();
         printk("hello OS!\n");
+        int_time=0;
+        int_handle_time=0;
 	// init Process Control Block (-_-!)
 	init_pcb();
 	printk("> [INIT] PCB initialization succeeded.\n");
@@ -183,9 +185,15 @@ void __attribute__((section(".entry_function"))) _start(void)
 }
 
 void show_int(void){
-    printk("now is handling interrupt\n");
+    printk("\n\nnow is handling interrupt(%d)\n",int_time++);
+    int_time++;
 }
 
+
 void show_handle_int(void){
-    printk("now is show_handle_int\n");
+    printk("\n\n\nnow is show_handle_int(%d)\n",int_handle_time++);
+}
+
+void show_error(void){
+    printk("error:beq not true\n");
 }

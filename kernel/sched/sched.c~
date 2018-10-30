@@ -28,7 +28,7 @@ void scheduler(void)
 
     //printk("running:scheduler\n");
     //store old current_running
-    if(current_running!=pcb)//pcb[0] actually is not a process
+    if(current_running!=pcb && current_running!=block_queue.tail)//pcb[0] actually is not a process
         queue_push(&ready_queue,current_running);//always think current is ready before do_scheduler
 
     //get new current_running

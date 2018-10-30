@@ -13,12 +13,17 @@ void printk_task1(void)
 {
     int i;
     int print_location = 1;
-
+    int count;
+    int compare;
     for (i = 0;; i++)
     {
         vt100_move_cursor(1, print_location);
         printk("> [TASK] This task is to test scheduler. (%d)", i);
         //do_scheduler();
+        //vt100_move_cursor(2, print_location);
+        count=get_count();
+        compare=get_compare();
+        printk("\n(%d)count:%d  compare:%d\n",i,count,compare);
     }
 }
 
@@ -26,7 +31,6 @@ void printk_task2(void)
 {
     int i;
     int print_location = 2;
-
     for (i = 0;; i++)
     {
         vt100_move_cursor(1, print_location);

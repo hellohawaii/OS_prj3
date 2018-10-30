@@ -5,7 +5,7 @@
 
 .macro STI //open interrupt
     mfc0 k0, CP0_STATUS
-    or k0,0x1//IE=1
+    ori k0,0x1//IE=1
     mtc0 k0, CP0_STATUS
 .endm
 
@@ -13,6 +13,12 @@
     mfc0 k0, CP0_STATUS
     and k0,0xfffffffe//IE=0
     mtc0 k0, CP0_STATUS
+.endm
+
+.macro RESET_TIMER
+    add $26,$0,0x3a98// 150000 is TIMER_INTERVAL
+    mtc0 $26,CP0_COMPARE
+    mtc0 $0,CP0_COUNT
 .endm
 
 LEAF(asm_start)
@@ -162,6 +168,7 @@ exception_handler_begin:
     and k0,$0
     or k1,$0,$0
     beq k0,k1,handle_int
+    jal show_error
     //in fact always jump to handle_int, because now all exceptions are interrupt
     // Leve2 exception Handler.
 exception_handler_end:
@@ -171,9 +178,14 @@ NESTED(handle_int, 0, sp)
     // interrupt handler
     //analysis the interrupt type by referring to interrupt_helper
     jal interrupt_helper
+    jal show_me
     RESTORE_CONTEXT(KERNEL)
+    //reset time
+    RESET_TIMER
     //open interrupt
     STI
+    jr ra
+    //eret
     // Leve3 exception Handler.
 END(handle_int)
 
@@ -205,6 +217,7 @@ LEAF(get_CP0_CAUSE)
     mfc0 v0,CP0_CAUSE
     jr ra
 END(get_CP0_CAUSE)
+
 //set_CP0
 LEAF(set_CP0_STATUS)
     mtc0 a0,CP0_STATUS
@@ -221,7 +234,20 @@ LEAF(close_int)
     jr ra
 END(close_int)
 
+LEAF(reset_timer)
+    RESET_TIMER
+    jr ra
+END(reset_timer)
 
+LEAF(get_compare)
+    mfc0 v0,CP0_COMPARE
+    jr ra
+END(get_compare)
+
+LEAF(get_count)
+    mfc0 v0,CP0_COUNT
+    jr ra
+END(get_count)
 //LEAF(flag)
 //    jr ra
 //END(flag)
