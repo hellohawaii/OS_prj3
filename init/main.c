@@ -133,7 +133,7 @@ static void init_exception()
     initial_STATUS=get_CP0_STATUS();
     printk("%x\n",initial_STATUS);
     reset_timer();
-    open_int();
+    //open_int();
     //printk("STATUS:%x,COMPARE:%x,COUNT:%x\n",get_CP0_STATUS(),get_CP0_COMPARE(),get_CP0_COUNT());
 }
 
@@ -169,8 +169,8 @@ void __attribute__((section(".entry_function"))) _start(void)
 	printk("> [INIT] SCREEN initialization succeeded.\n");
 
 	// TODO Enable interrupt
-	//open_int();
-        printk(":-)\n");
+	open_int();
+        //printk(":-)\n");
 	while (1)
 	{
 		// (QAQQQQQQQQQQQ)
