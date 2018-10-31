@@ -16,8 +16,16 @@
 .endm
 
 .macro RESET_TIMER
-    mtc0 $0,CP0_COUNT
+/*this is ok,but 3a98 is 15000
+    //because 15000 is too small, count must set after compare, or maybe before open_int, compare=count
+    //but that time IP can not be set because int is close.
+    //after open_int, count>compare already, no interrupt
     add $26,$0,0x3a98// 150000 is TIMER_INTERVAL
+    mtc0 $26,CP0_COMPARE
+    mtc0 $0,CP0_COUNT
+*/
+    mtc0 $0,CP0_COUNT
+    add $26,$0,0x249f0// 150000 is TIMER_INTERVAL
     mtc0 $26,CP0_COMPARE
 .endm
 

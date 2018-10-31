@@ -27,8 +27,8 @@ void printk_task1(void)
 {
     int i;
     int print_location = 1;
-    //int count;
-    //int compare;
+    int count;
+    int compare;
     //reset_timer();
     //count=get_count();
     //compare=get_compare();
@@ -37,15 +37,15 @@ void printk_task1(void)
         // Used for task3
         // disable interrupt & enable interrupt for Preemptive scheduling
         //disable_interrupt();
+        count=get_count();
+        compare=get_compare();
+	int status = get_status();
         close_int();
-
         vt100_move_cursor(1, print_location);
-        printk("> [TASK] This task is to test scheduler. (%d)", i);
+        printk("> [TASK] This task is to test scheduler. (%d)count:%d  compare:%d  status: %x\n", i,count,compare,status);
+        //getchar();
         //do_scheduler();
         //vt100_move_cursor(2, print_location);
-        //count=get_count();
-        //compare=get_compare();
-	//int status = get_status();
         //reset_timer();
         //printk("\n(%d)count:%d  compare:%d  status: %x\n",i,count,compare,status);
 
@@ -62,17 +62,20 @@ void printk_task2(void)
 {
     int i;
     int print_location = 2;
-
+    int count;
+    int compare;
     for (i = 0;; i++)
     {
         // Used for task3
         // disable interrupt & enable interrupt for Preemptive scheduling
         //disable_interrupt();
+        count=get_count();
+        compare=get_compare();
+	int status = get_status();
         close_int();
-
         vt100_move_cursor(1, print_location);
-        printk("> [TASK] This task is to test scheduler. (%d)", i);
-
+        printk("> [TASK] This task is to test scheduler. (%d)count:%d  compare:%d  status: %x\n", i,count,compare,status);
+        //getchar();
         //enable_interrupt();
         open_int();
 
