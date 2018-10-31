@@ -25,7 +25,7 @@
     mtc0 $0,CP0_COUNT
 */
     mtc0 $0,CP0_COUNT
-    add $26,$0,0x249f0// 150000 is TIMER_INTERVAL
+    add $26,$0,0x249f0000// 150000 is TIMER_INTERVAL
     mtc0 $26,CP0_COMPARE
 .endm
 

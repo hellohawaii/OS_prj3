@@ -40,8 +40,6 @@ int int_handle_time;
 static void init_pcb()
 {
 //the following codes are for task1
-    //intialize the queue
-    queue_init(&ready_queue);
     //store PCBs to the array
     int i;
     for(i=1;i<=3;i++){
@@ -54,7 +52,10 @@ static void init_pcb()
         pcb[i].type=sched1_tasks[i-1]->type;
         pcb[i].pid=i;
         pcb[i].status=TASK_READY;
-        queue_push(&ready_queue,pcb+i);
+        pcb[i].priority=i;
+        //intialize the queue
+        queue_init(&(ready_queue_array+i-1));
+        queue_push(&(ready_queue_array+i-1),pcb+i);
         //TODO:NOT SURE, do I need to initial thee attribute stack_top?
         //special reg
         pcb[i].user_context.cp0_status=0x10008000;
@@ -133,7 +134,7 @@ static void init_exception()
     initial_STATUS=get_CP0_STATUS();
     printk("%x\n",initial_STATUS);
     reset_timer();
-    open_int();
+    //open_int();
     //printk("STATUS:%x,COMPARE:%x,COUNT:%x\n",get_CP0_STATUS(),get_CP0_COMPARE(),get_CP0_COUNT());
 }
 
@@ -169,8 +170,8 @@ void __attribute__((section(".entry_function"))) _start(void)
 	printk("> [INIT] SCREEN initialization succeeded.\n");
 
 	// TODO Enable interrupt
-	//open_int();
-        printk(":-)\n");
+	open_int();
+        //printk(":-)\n");
 	while (1)
 	{
 		// (QAQQQQQQQQQQQ)

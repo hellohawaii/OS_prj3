@@ -107,8 +107,7 @@ typedef struct task_info
 } task_info_t;
 
 /* ready queue to run */
-//extern queue_t ready_queue;
-extern queue_t ready_queue_array[3];
+extern queue_t ready_queue;
 
 /* block queue to wait */
 extern queue_t block_queue;

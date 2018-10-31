@@ -40,8 +40,6 @@ int int_handle_time;
 static void init_pcb()
 {
 //the following codes are for task1
-    //intialize the queue
-    queue_init(&ready_queue);
     //store PCBs to the array
     int i;
     for(i=1;i<=3;i++){
@@ -54,7 +52,10 @@ static void init_pcb()
         pcb[i].type=sched1_tasks[i-1]->type;
         pcb[i].pid=i;
         pcb[i].status=TASK_READY;
-        queue_push(&ready_queue,pcb+i);
+        pcb[i].priority=i;
+        //intialize the queue
+        queue_init(ready_queue_array+i-1);
+        queue_push(ready_queue_array+i-1,pcb+i);
         //TODO:NOT SURE, do I need to initial thee attribute stack_top?
         //special reg
         pcb[i].user_context.cp0_status=0x10008000;
