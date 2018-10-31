@@ -181,7 +181,7 @@ exception_handler_begin:
     //jal show_int
     // decided by ExcCode field
     mfc0 k0,CP0_CAUSE
-    andi k0,0x000003c
+    andi k0,0x000007c
     or k1,$0,$0
     beq k0,k1,handle_int
     jal show_error
