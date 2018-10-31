@@ -158,11 +158,12 @@ exception_handler_begin:
     //jal show_int
     // close interrupt
     CLI
+    jal show_int
     //TODO,not sure, when should store the context
     //TODO:which special regs should be stored?
     SAVE_CONTEXT(KERNEL)
     // jmp exception_handler[i] which decided by CP0_CAUSE
-    jal show_int
+    //jal show_int
     // decided by ExcCode field
     mfc0 k0,CP0_CAUSE
     and k0,$0
@@ -243,6 +244,11 @@ LEAF(get_compare)
     mfc0 v0,CP0_COMPARE
     jr ra
 END(get_compare)
+
+LEAF(get_status)
+    mfc0 v0,CP0_STATUS
+    jr ra
+END(get_status)
 
 LEAF(get_count)
     mfc0 v0,CP0_COUNT
