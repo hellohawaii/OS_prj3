@@ -123,8 +123,6 @@ static void init_exception()
     // 1. Get CP0_STATUS
     //only change part of CP_STATUS, perhaps this is the reason why we gets CP0_STATUS
     uint32_t initial_STATUS;
-    //can not use the reg name directly,$26 for k0,$27 for k1,$13 for CP0_CAUSE
-    //$11 for CP0_COMPARE, $9 for CP0_COUNT, $12 for CP0_STATUS
     initial_STATUS=get_CP0_STATUS();
     printk("%d\n",initial_STATUS);
     // 2. Disable all interrupt
@@ -136,6 +134,8 @@ static void init_exception()
     reset_timer();
     //restore the CP0_STATUS and open interrupt
     set_CP0_STATUS(initial_STATUS & 0xffff80ff | 0x8000 | STATUS_CU0);
+    initial_STATUS=get_CP0_STATUS();
+    printk("%x\n",initial_STATUS);
     open_int();
     //printk("STATUS:%x,COMPARE:%x,COUNT:%x\n",get_CP0_STATUS(),get_CP0_COMPARE(),get_CP0_COUNT());
 }
@@ -157,11 +157,11 @@ void __attribute__((section(".entry_function"))) _start(void)
         int_handle_time=0;
 	// init Process Control Block (-_-!)
 	init_pcb();
-	//printk("> [INIT] PCB initialization succeeded.\n");
+	printk("> [INIT] PCB initialization succeeded.\n");
 
 	// init interrupt (^_^)
 	init_exception();
-	//printk("> [INIT] Interrupt processing initialization succeeded.\n");
+	printk("> [INIT] Interrupt processing initialization succeeded.\n");
 
 	// init system call table (0_0)
 	init_syscall();

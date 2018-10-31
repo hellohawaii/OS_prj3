@@ -16,9 +16,9 @@
 .endm
 
 .macro RESET_TIMER
+    mtc0 $0,CP0_COUNT
     add $26,$0,0x3a98// 150000 is TIMER_INTERVAL
     mtc0 $26,CP0_COMPARE
-    mtc0 $0,CP0_COUNT
 .endm
 
 LEAF(asm_start)
@@ -87,7 +87,6 @@ END(asm_start)
     mfc0 k1, CP0_EPC
     sw k1,148(k0)
     //not sure, is it necessary to store all of these special regs?
-    //TODO, store PC, it is important when using clock inter, need to know stopat where
 .endm
 
 .macro RESTORE_CONTEXT offset
@@ -178,16 +177,18 @@ END(exception_handler_entry)
 NESTED(handle_int, 0, sp)
     // interrupt handler
     //analysis the interrupt type by referring to interrupt_helper
+    //need to pass parameter
+    mfc0  a0, CP0_STATUS
+    mfc0  a1, CP0_CAUSE
+    addiu sp,sp,-8
     jal interrupt_helper
+    addiu sp,sp,8
     //jal show_me
     RESTORE_CONTEXT(KERNEL)
     //reset time
     RESET_TIMER
     //open interrupt
     STI
-    //change EXL
-    mfc0 k1,CP0_STATUS
-    add k1,0x1111111c
     //jr ra
     eret
     // Leve3 exception Handler.
