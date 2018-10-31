@@ -131,7 +131,7 @@ static void init_exception()
     close_int();
     // 3. Copy the level 2 exception handling code to 0x80000180
     memcpy(BEV0_EBASE+BEV0_OFFSET,exception_handler_begin,exception_handler_end-exception_handler_begin);//irq.h define the macro
-    printk("hhhh\n");
+    //printk("hhhh\n");
     // 4. reset CP0_COMPARE & CP0_COUNT register
     reset_timer();
     //restore the CP0_STATUS and open interrupt
@@ -157,19 +157,19 @@ void __attribute__((section(".entry_function"))) _start(void)
         int_handle_time=0;
 	// init Process Control Block (-_-!)
 	init_pcb();
-	printk("> [INIT] PCB initialization succeeded.\n");
+	//printk("> [INIT] PCB initialization succeeded.\n");
 
 	// init interrupt (^_^)
 	init_exception();
-	printk("> [INIT] Interrupt processing initialization succeeded.\n");
+	//printk("> [INIT] Interrupt processing initialization succeeded.\n");
 
 	// init system call table (0_0)
 	init_syscall();
-	printk("> [INIT] System call initialized successfully.\n");
+	//printk("> [INIT] System call initialized successfully.\n");
 
 	// init screen (QAQ)
 	init_screen();
-	printk("> [INIT] SCREEN initialization succeeded.\n");
+	//printk("> [INIT] SCREEN initialization succeeded.\n");
 
 	// TODO Enable interrupt
 	//open_int();
@@ -184,6 +184,10 @@ void __attribute__((section(".entry_function"))) _start(void)
 	return;
 }
 
+void stop_here(void){
+    while(1);
+}
+
 void show_int(void){
     printk("\n\nnow is handling interrupt(%d)\n",int_time++);
     int_time++;
@@ -195,9 +199,12 @@ void show_handle_int(void){
 }
 
 void show_error(void){
-    printk("error:beq not true\n");
+    printk("error:beq not true,CP0_CAUSE is %x\n",get_CP0_CAUSE());
+    printk("EPC:%x\n",get_EPC());
+    stop_here();
 }
 
 void show_me(void){
     printk("I am here\n");
 }
+

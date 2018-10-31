@@ -158,7 +158,7 @@ exception_handler_begin:
     //jal show_int
     // close interrupt
     CLI
-    jal show_int
+    //jal show_int
     //TODO,not sure, when should store the context
     //TODO:which special regs should be stored?
     SAVE_CONTEXT(KERNEL)
@@ -166,7 +166,7 @@ exception_handler_begin:
     //jal show_int
     // decided by ExcCode field
     mfc0 k0,CP0_CAUSE
-    and k0,$0
+    andi k0,0x000003c
     or k1,$0,$0
     beq k0,k1,handle_int
     jal show_error
@@ -179,14 +179,17 @@ NESTED(handle_int, 0, sp)
     // interrupt handler
     //analysis the interrupt type by referring to interrupt_helper
     jal interrupt_helper
-    jal show_me
+    //jal show_me
     RESTORE_CONTEXT(KERNEL)
     //reset time
     RESET_TIMER
     //open interrupt
     STI
-    jr ra
-    //eret
+    //change EXL
+    mfc0 k1,CP0_STATUS
+    add k1,0x1111111c
+    //jr ra
+    eret
     // Leve3 exception Handler.
 END(handle_int)
 
@@ -252,6 +255,11 @@ END(get_status)
 
 LEAF(get_count)
     mfc0 v0,CP0_COUNT
+    jr ra
+END(get_count)
+
+LEAF(get_EPC)
+    mfc0 v0,CP0_EPC
     jr ra
 END(get_count)
 //LEAF(flag)
