@@ -8,7 +8,7 @@ static void irq_timer()
     // TODO clock interrupt handler.
     // scheduler, time counter in here to do, emmmmmm maybe.
     //show_handle_int();
-    scheduler();
+    do_scheduler();
     return;
 }
 

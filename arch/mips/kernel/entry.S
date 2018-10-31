@@ -36,7 +36,10 @@ END(asm_start)
 
 .macro SAVE_CONTEXT offset
     // TODO save context
-    lw k0,current_running
+    //lw k0,current_running
+    la	k0, current_running
+    lw	k0, 0(k0)
+    addi k0, k0, \offset
     //TODO:not sure, if current_running is the addr of variable current_running
     //then should use lw. Or we should use la
     // now, t0 is current_running, i.e. the addr of current pcb
@@ -91,7 +94,9 @@ END(asm_start)
 
 .macro RESTORE_CONTEXT offset
     // TODO restore context
-    lw k0,current_running
+    la	k0, current_running
+    lw	k0, 0(k0)
+    addi k0, k0, \offset
     //not sure, if current_running is the addr of variable current_running
     //then should use lw. Or we should use la
     // now, t0 is current_running, i.e. the addr of current pcb
@@ -160,7 +165,7 @@ exception_handler_begin:
     //jal show_int
     //TODO,not sure, when should store the context
     //TODO:which special regs should be stored?
-    SAVE_CONTEXT(KERNEL)
+    SAVE_CONTEXT(USER)
     // jmp exception_handler[i] which decided by CP0_CAUSE
     //jal show_int
     // decided by ExcCode field
@@ -178,13 +183,14 @@ NESTED(handle_int, 0, sp)
     // interrupt handler
     //analysis the interrupt type by referring to interrupt_helper
     //need to pass parameter
+    //jal show_me
     mfc0  a0, CP0_STATUS
     mfc0  a1, CP0_CAUSE
     addiu sp,sp,-8
     jal interrupt_helper
     addiu sp,sp,8
-    //jal show_me
-    RESTORE_CONTEXT(KERNEL)
+    //jal show_me_again
+    RESTORE_CONTEXT(USER)
     //reset time
     RESET_TIMER
     //open interrupt

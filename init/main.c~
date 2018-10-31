@@ -43,33 +43,29 @@ static void init_pcb()
     //intialize the queue
     queue_init(&ready_queue);
     //store PCBs to the array
-    pcb[1].kernel_context.regs[29]=0xa0f00000;//sp
-    pcb[1].kernel_context.regs[31]=sched1_tasks[0]->entry_point;//ra
-    pcb[1].type=sched1_tasks[0]->type;
-    pcb[1].pid=1;
-    pcb[1].status=TASK_READY;
-    pcb[2].kernel_context.regs[29]=0xa0f10000;//sp
-    pcb[2].kernel_context.regs[31]=sched1_tasks[1]->entry_point;//ra
-    pcb[2].type=sched1_tasks[1]->type;
-    pcb[2].pid=2;
-    pcb[2].status=TASK_READY;
-    pcb[3].kernel_context.regs[29]=0xa0f20000;//sp
-    pcb[3].kernel_context.regs[31]=sched1_tasks[2]->entry_point;//ra
-    pcb[3].type=sched1_tasks[2]->type;
-    pcb[3].pid=3;
-    pcb[3].status=TASK_READY;
-    //move them to the ready queue
-    //modify the pointer in PCB, may not be necessary
-    //ready_queue.head=pcb+1;
-    //pcb[1].prev=NULL;
-    //pcb[1].next=pcb+2;
-    //pcb[2].prev=pcb+1;
-    //pcb[2].next=pcb+3;
-    //pcb[3].prev=pcb+2;
-    //pcb[3].next=NULL;
-    queue_push(&ready_queue,pcb+1);
-    queue_push(&ready_queue,pcb+2);
-    queue_push(&ready_queue,pcb+3);
+    int i;
+    for(i=1;i<=3;i++){
+        //universal reg
+        pcb[i].kernel_context.regs[29]=0xa0f00000+i*0x10000;//sp
+        pcb[i].user_context.regs[29]=0xa0f00000+i*0x10000-0x01000;//sp
+        pcb[i].kernel_context.regs[31]=(int)(handle_int+0x10);//ra
+        pcb[i].user_context.regs[31]=sched1_tasks[i-1]->entry_point;//ra
+        //process attribute
+        pcb[i].type=sched1_tasks[i-1]->type;
+        pcb[i].pid=i;
+        pcb[i].status=TASK_READY;
+        queue_push(&ready_queue,pcb+i);
+        //TODO:NOT SURE, do I need to initial thee attribute stack_top?
+        //special reg
+        pcb[i].user_context.cp0_status=0x10008000;
+        pcb[i].user_context.cp0_badvaddr=0;
+        pcb[i].user_context.cp0_cause=0;
+        pcb[i].user_context.cp0_epc=sched1_tasks[i-1]->entry_point;
+        pcb[i].kernel_context.cp0_status=0x10008000;
+        pcb[i].kernel_context.cp0_badvaddr=0;
+        pcb[i].kernel_context.cp0_cause=0;
+        pcb[i].kernel_context.cp0_epc=0;
+    }
     //initial current_running here
     current_running=pcb;
 
@@ -136,6 +132,7 @@ static void init_exception()
     set_CP0_STATUS(initial_STATUS & 0xffff80ff | 0x8000 | STATUS_CU0);
     initial_STATUS=get_CP0_STATUS();
     printk("%x\n",initial_STATUS);
+    reset_timer();
     open_int();
     //printk("STATUS:%x,COMPARE:%x,COUNT:%x\n",get_CP0_STATUS(),get_CP0_COMPARE(),get_CP0_COUNT());
 }
@@ -208,3 +205,6 @@ void show_me(void){
     printk("I am here\n");
 }
 
+void show_me_again(void){
+    printk("I am here now\n");
+}
