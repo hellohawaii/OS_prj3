@@ -50,16 +50,18 @@ static void init_pcb()
     //store PCBs to the array, initialize the ready queues
     int i;
     int num_all_tasks=num_timer_tasks+num_sched2_tasks+num_lock_tasks;
-    printk("taskS number:%d\n",num_all_tasks);
+    //printk("taskS number:%d\n",num_all_tasks);
     struct task_info *all_tasks[16];
 
     all_tasks[0] = timer_tasks[0];
     all_tasks[1] = timer_tasks[1];
     all_tasks[2] = sched2_tasks[0];
+
     all_tasks[3] = sched2_tasks[1];
     all_tasks[4] = sched2_tasks[2];
     all_tasks[5] = lock_tasks[0];
     all_tasks[6] = lock_tasks[1];
+
 
     for(i=1;i<=num_all_tasks;i++){
         printk("trying to initializing:%d\n",i);
@@ -242,7 +244,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 		//do_scheduler();
                 
 	};
-        printk(":-(\n");
+        //printk(":-(\n");
 	return;
 }
 
@@ -261,8 +263,8 @@ void show_handle_int(void){
 }
 
 void show_error(void){
-    printk("error:beq not true,CP0_CAUSE is %d\n",get_CP0_CAUSE());
-    printk("EPC:%x\n",get_EPC());
+ //   printk("error:beq not true,CP0_CAUSE is %d\n",get_CP0_CAUSE());
+ //   printk("EPC:%x\n",get_EPC());
     stop_here();
 }
 

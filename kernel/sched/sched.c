@@ -24,12 +24,14 @@ static void check_sleeping()
     void *p=sleep_queue.head;
     void *nextp;
     while(p!=NULL){
-        if(((pcb_t *)p)->alarm_time >= get_timer()){
+        if(((pcb_t *)p)->alarm_time < get_timer()){
             nextp=queue_remove(&sleep_queue, p);
             queue_push(ready_queue_array,p);//the newly waked up process is assumed to be highest priority
             p=nextp;
         }else{
+            //printk("HI!");
             p=((pcb_t *)p)->next;
+            //printk("BYE!");
         }
     }
 }

@@ -187,7 +187,7 @@ exception_handler_begin:
     beq k0,k1,handle_int
     li k1, 0x20
     beq k0, k1, handle_syscall
-    jal show_error
+    //jal show_error
     //in fact always jump to handle_int, because now all exceptions are interrupt
     // Leve2 exception Handler.
 exception_handler_end:
@@ -312,6 +312,7 @@ LEAF(get_EPC)
     mfc0 v0,CP0_EPC
     jr ra
 END(get_EPC)
+
 //LEAF(flag)
 //    jr ra
 //END(flag)
