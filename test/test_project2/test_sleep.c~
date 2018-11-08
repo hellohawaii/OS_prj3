@@ -9,8 +9,8 @@ void sleep_task(void)
 {
     int i;
     int print_location = 1;
-    int sleep_time = 5;
-    //int sleep_time = 100000000;
+    //int sleep_time = 5;
+    int sleep_time = 100000000;
     //printk("begin:sleep_task\n");
     while (1)
     {

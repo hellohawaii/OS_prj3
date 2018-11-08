@@ -9,6 +9,8 @@ static void irq_timer()
     // scheduler, time counter in here to do, emmmmmm maybe.
     //show_handle_int();
     do_scheduler();
+    time_elapsed+=100000;
+    screen_reflush();
     return;
 }
 

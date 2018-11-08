@@ -25,7 +25,7 @@
     mtc0 $0,CP0_COUNT
 */
     mtc0 $0,CP0_COUNT
-    add $26,$0,0x249f0000
+    add $26,$0,150000
     // 150000 is TIMER_INTERVAL
     //using large interval to show the progross
     //the default interval is 0x249f0
@@ -182,8 +182,11 @@ exception_handler_begin:
     // decided by ExcCode field
     mfc0 k0,CP0_CAUSE
     andi k0,0x000007c
-    or k1,$0,$0
+    //k0 only have ExCode
+    or k1,$0,$0//perhaps use li looks little better
     beq k0,k1,handle_int
+    li k1, 0x20
+    beq k0, k1, handle_syscall
     jal show_error
     //in fact always jump to handle_int, because now all exceptions are interrupt
     // Leve2 exception Handler.
@@ -213,6 +216,35 @@ END(handle_int)
 
 NESTED(handle_syscall, 0, sp)
     // system call handler
+    //analysis the syscall type by referring to system_call_helper(c function in syscall.c)
+    //need to pass parameter
+    //when the user using syscall, user will store the paremeter and syscall number needed in regs(USER CONTEXT)
+    //fortunatly, these regs have not been changed since beginning to handling the exception
+    //Prepared parameters: syscall number:v0 parameter:a0,a1,a2
+    //Needed parameters: syscall number: a0, arg1:a1, arg2:a2, arg3:a3
+    or a3,a2,zero
+    or a2,a1,zero
+    or a1,a0,zero
+    or a0,v0,zero
+    //these are KERNEL CONTEXT
+    addiu sp,sp,-16
+    jal system_call_helper
+    addiu sp,sp,16
+
+    or k0,v0,zero
+    RESTORE_CONTEXT(USER)
+    or v0,k0,zero
+    //thanks to k0 which will not be changed by RESTORE_CONTEXT
+    
+    //modify EPC
+    mfc0 k0, CP0_EPC
+    addiu k0, k0, 0x4
+    mtc0 k0, CP0_EPC
+
+    //just lisk handle_int
+    //RESET_TIMER
+    STI
+    eret
 END(handle_syscall)
 
 NESTED(handle_other, 0, sp)

@@ -17,13 +17,32 @@ pid_t process_id = 1;
 //queue_t ready_queue;
 queue_t ready_queue_array[3];
 queue_t block_queue;
+queue_t sleep_queue;
 
 static void check_sleeping()
-{
+{//wake all sleeping processes whose alarm clock went off
+    void *p=sleep_queue.head;
+    void *nextp;
+    while(p!=NULL){
+        if(((pcb_t *)p)->alarm_time <= get_timer()){
+            nextp=queue_remove(&sleep_queue, p);
+            queue_push(ready_queue_array,p);//the newly waked up process is assumed to be highest priority
+            p=nextp;
+        }else{
+            p=((pcb_t *)p)->next;
+        }
+    }
 }
 
 void scheduler(void)
 {
+     //save the cursor
+    current_running->cursor_x=screen_cursor_x;
+    current_running->cursor_y=screen_cursor_y;
+
+    //printk("before_checking_sleeping\n");
+    //wake up processes acording to alarm clock
+    check_sleeping();
     // TODO schedule
     // Modify the current_running pointer.
 
@@ -32,17 +51,84 @@ void scheduler(void)
     int priority=((pcb_t *)current_running)->priority;
     ((pcb_t *)current_running)->priority=(priority<=2)?priority+1:3;
     if(current_running!=pcb && current_running!=block_queue.tail)//pcb[0] actually is not a process
-        queue_push(ready_queue_array+priority-1,current_running);//always think current is ready before do_scheduler
+        queue_push(ready_queue_array+((pcb_t *)current_running)->priority-1,current_running);//always think current is ready before do_scheduler
 
     //get new current_running
     current_running=(!queue_is_empty(ready_queue_array))?queue_dequeue(ready_queue_array):
         (!queue_is_empty(ready_queue_array+1))?queue_dequeue(ready_queue_array+1):
         queue_dequeue(ready_queue_array+2);
+    //printk("next pid%d",current_running->pid);
+    //restore the cursor
+    screen_cursor_x=current_running->cursor_x;
+    screen_cursor_y=current_running->cursor_y;
+
+    /*the following is for debugging
+    void *tempp;
+    printk("current_running:%d ",current_running->pid);
+    printk("ready_queue priority1: ");
+    for(tempp=ready_queue_array->head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    //printk("\n");
+    printk("ready_queue priority2: ");
+    for(tempp=(ready_queue_array+1)->head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    //printk("\n");
+    printk("ready_queue priority3: ");
+    for(tempp=(ready_queue_array+2)->head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    //printk("\n");
+    printk("block_queue: ");
+    for(tempp=block_queue.head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    printk("sleep_queue: ");
+    for(tempp=sleep_queue.head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    */
+
+    /*the following is for debugging
+    //output reduced
+    void *tempp;
+    printk("c:%d ",current_running->pid);
+    printk("p1:");
+    for(tempp=ready_queue_array->head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    //printk("\n");
+    printk("p2:");
+    for(tempp=(ready_queue_array+1)->head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    //printk("\n");
+    printk("p3:");
+    for(tempp=(ready_queue_array+2)->head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    //printk("\n");
+    printk("b:");
+    for(tempp=block_queue.head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    printk("s:");
+    for(tempp=sleep_queue.head;tempp!=NULL;tempp = ((pcb_t *)tempp)->next){
+        printk("%d ",((pcb_t *)tempp)->pid);
+    }
+    */
 }
 
 void do_sleep(uint32_t sleep_time)
 {
     // TODO sleep(seconds)
+    //current_running->status=TASK_SLEEPING;
+    current_running->alarm_time=sleep_time+get_timer();//using get_timer(reduced time_elapsed)
+    //using get_timer, this fit check_sleeping well
+    //alarm time is reduced time (time_elapsed/10000000)
+    queue_push(&sleep_queue,current_running);
+    do_scheduler();
 }
 
 void do_block(queue_t *queue)
@@ -54,6 +140,7 @@ void do_block(queue_t *queue)
 void do_unblock_one(queue_t *queue)
 {
     // unblock the head task from the queue
+    //the new unblocked process is assumed to be highest priority
     queue_push(ready_queue_array,queue_dequeue(&block_queue));
     //don't forget to push into the ready queue
 }
@@ -61,7 +148,8 @@ void do_unblock_one(queue_t *queue)
 void do_unblock_all(queue_t *queue)
 {
     // unblock all task in the queue
+    //the new unblocked process is assumed to be highest priority
     while(!queue_is_empty(&block_queue))
-        queue_push(&ready_queue,queue_dequeue(&block_queue));
+        queue_push(ready_queue_array,queue_dequeue(&block_queue));
 }
 

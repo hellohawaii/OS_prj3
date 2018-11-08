@@ -8,7 +8,7 @@ void timer_task(void)
 {
     int count = 0;
     int print_location = 2;
-    //printk("begin:timer_task1\n");
+printk("begin:timer_task1\n");
     while (1)
     {
         /* call get_timer() to get time */

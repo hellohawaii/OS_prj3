@@ -6,7 +6,7 @@
 
 void system_call_helper(int fn, int arg1, int arg2, int arg3)
 {
-    //printk("syscall num:%d\n",fn);
+    printk("syscall num:%d\n",fn);
     // syscall[fn](arg1, arg2, arg3)
     //just need to call the function needed, just use fn (syscall number) to find the function needed in array syscall
     if(fn >= 0 && fn <NUM_SYSCALLS)

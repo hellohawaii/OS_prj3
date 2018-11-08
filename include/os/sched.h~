@@ -58,6 +58,7 @@ typedef enum {
     TASK_RUNNING,
     TASK_READY,
     TASK_EXITED,
+    TASK_SLEEPING,
 } task_status_t;
 
 typedef enum {
@@ -80,6 +81,9 @@ typedef struct pcb
     /* previous, next pointer */
     void *prev;
     void *next;
+
+    /*set alarm clock to which time, i.e. when the process want to wake up*/
+    uint32_t alarm_time
 
     /* process id */
     pid_t pid;
@@ -107,10 +111,14 @@ typedef struct task_info
 } task_info_t;
 
 /* ready queue to run */
-extern queue_t ready_queue;
+//extern queue_t ready_queue;
+extern queue_t ready_queue_array[3];
 
 /* block queue to wait */
 extern queue_t block_queue;
+
+/* sleeping queue to wait */
+extern queue_t sleep_queue;
 
 /* current running task PCB */
 extern pcb_t *current_running;
