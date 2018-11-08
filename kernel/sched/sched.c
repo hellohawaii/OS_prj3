@@ -52,7 +52,7 @@ void scheduler(void)
     //store old current_running
     int priority=((pcb_t *)current_running)->priority;
     ((pcb_t *)current_running)->priority=(priority<=2)?priority+1:3;
-    if(current_running!=pcb && current_running!=block_queue.tail)//pcb[0] actually is not a process
+    if(current_running!=pcb && current_running!=block_queue.tail && current_running!=sleep_queue.tail)//pcb[0] actually is not a process
         queue_push(ready_queue_array+((pcb_t *)current_running)->priority-1,current_running);//always think current is ready before do_scheduler
 
     //get new current_running

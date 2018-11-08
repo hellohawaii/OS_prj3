@@ -29,9 +29,9 @@ static void check_sleeping()
             queue_push(ready_queue_array,p);//the newly waked up process is assumed to be highest priority
             p=nextp;
         }else{
-            printk("HI!");
+            //printk("HI!");
             p=((pcb_t *)p)->next;
-            printk("BYE!");
+            //printk("BYE!");
         }
     }
 }

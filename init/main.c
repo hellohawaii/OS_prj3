@@ -263,8 +263,8 @@ void show_handle_int(void){
 }
 
 void show_error(void){
- //   printk("error:beq not true,CP0_CAUSE is %d\n",get_CP0_CAUSE());
- //   printk("EPC:%x\n",get_EPC());
+    printk("error:beq not true,CP0_CAUSE is %d\n",get_CP0_CAUSE());
+    printk("EPC:%x\n",get_EPC());
     stop_here();
 }
 
