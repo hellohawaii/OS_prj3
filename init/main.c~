@@ -35,108 +35,57 @@
 #include "regs.h"
 //#include "screen.h"
 /* screen buffer */
-#define SCREEN_WIDTH    80
-#define SCREEN_HEIGHT   50
 extern char new_screen[SCREEN_HEIGHT * SCREEN_WIDTH];
 extern char old_screen[SCREEN_HEIGHT * SCREEN_WIDTH];
+
+void process_show(void);
 
 int int_time;
 int int_handle_time;
 
+int next_pid;
+
 static void init_pcb()
 {
-//initialzie pcb and the queues
-//the following codes are for task4
-    //store PCBs to the array, initialize the ready queues
     int i;
-    int num_all_tasks=num_timer_tasks+num_sched2_tasks+num_lock_tasks;
-    //printk("taskS number:%d\n",num_all_tasks);
-    struct task_info *all_tasks[16];
-
-    all_tasks[0] = timer_tasks[0];
-    all_tasks[1] = timer_tasks[1];
-    all_tasks[2] = sched2_tasks[0];
-
-    all_tasks[3] = sched2_tasks[1];
-    all_tasks[4] = sched2_tasks[2];
-    all_tasks[5] = lock_tasks[0];
-    all_tasks[6] = lock_tasks[1];
-
-
-    for(i=1;i<=num_all_tasks;i++){
-        printk("trying to initializing:%d\n",i);
-        //universal reg
-        pcb[i].kernel_context.regs[29]=0xa0f00000+i*0x10000;//sp
-        pcb[i].user_context.regs[29]=0xa0f00000+i*0x10000-0x01000;//sp
-        pcb[i].kernel_context.regs[31]=(int)(handle_int+0x14);//ra
-        pcb[i].user_context.regs[31]=all_tasks[i-1]->entry_point;//ra
-        //process attribute
-        pcb[i].type=all_tasks[i-1]->type;
-        pcb[i].pid=i;
-        pcb[i].status=TASK_READY;
-        pcb[i].priority=i%3+1;//priority=1/2/3
-        //intialize the queue
-        if(i<=3){
-            queue_init(ready_queue_array+i%3);
-        }
-        queue_push(ready_queue_array+i%3,pcb+i);
-        //TODO:NOT SURE, do I need to initial thee attribute stack_top?
-        //special reg
-        pcb[i].user_context.cp0_status=0x10008000;
-        pcb[i].user_context.cp0_badvaddr=0;
-        pcb[i].user_context.cp0_cause=0;
-        pcb[i].user_context.cp0_epc=all_tasks[i-1]->entry_point;
-        pcb[i].kernel_context.cp0_status=0x10008000;
-        pcb[i].kernel_context.cp0_badvaddr=0;
-        pcb[i].kernel_context.cp0_cause=0;
-        pcb[i].kernel_context.cp0_epc=all_tasks[i-1]->entry_point;
-        printk("finish initializing:%d\n",i);
-    }
     //initial current_running here
     current_running=pcb;
-    //initial sleep_queue;
+    //initial queues;
+    for(i=0;i<3;i++){
+        queue_init(ready_queue_array+i);
+    }
     queue_init(&sleep_queue);
     queue_init(&block_queue);
-
-
-/*the following codes are for task2
-    //intialize the queue
-    queue_init(&ready_queue);
-    queue_init(&block_queue);
-    //store PCBs to the array
-    int i;
-    for(i=1;i<=3;i++){
-        pcb[i].kernel_context.regs[29]=0xa0f00000+0x10000*i;//sp
-        pcb[i].kernel_context.regs[31]=sched1_tasks[i-1]->entry_point;//ra
-        pcb[i].type=sched1_tasks[i-1]->type;
-        pcb[i].pid=i;
-        pcb[i].status=TASK_READY;
-        pcb[i].kernel_context.cp0_status=0;
-        pcb[i].kernel_context.hi=0;
-        pcb[i].kernel_context.lo=0;
-        pcb[i].kernel_context.cp0_badvaddr=0;
+    //initial PCB table
+    for(i=2;i<NUM_MAX_TASK;i++){
+        pcb[i].status=TASK_NOT_EXIST;
     }
-    for(i=4;i<=5;i++){
-        pcb[i].kernel_context.regs[29]=0xa0f00000+0x10000*i;//sp
-        pcb[i].kernel_context.regs[31]=lock_tasks[i-4]->entry_point;//ra
-        pcb[i].type=lock_tasks[i-4]->type;
-        pcb[i].pid=i;
-        pcb[i].status=TASK_READY;
-        pcb[i].status=TASK_READY;
-        pcb[i].kernel_context.cp0_status=0;
-        pcb[i].kernel_context.hi=0;
-        pcb[i].kernel_context.lo=0;
-        pcb[i].kernel_context.cp0_badvaddr=0;
-    }
-    //move them to the ready queue
-    queue_push(&ready_queue,pcb+1);
-    queue_push(&ready_queue,pcb+2);
-    queue_push(&ready_queue,pcb+3);
-    queue_push(&ready_queue,pcb+4);
-    queue_push(&ready_queue,pcb+5);
-    //initial current_running here
-    current_running=pcb;
-*/
+    //initial the shell process into pcb[1]
+    //universal reg
+    pcb[1].kernel_context.regs[29]=0xa0f00000+0x10000;//sp
+    pcb[1].user_context.regs[29]=0xa0f00000+0x10000-0x01000;//sp
+    pcb[1].kernel_context.regs[31]=(uint32_t)(handle_int+0x14);//ra
+    pcb[1].user_context.regs[31]=(uint32_t)&test_shell;//ra
+    //printk("univer reg\n");
+    //process attribute
+    pcb[1].type=3;//USER_PROCESS
+    pcb[1].pid=1;
+    pcb[1].status=TASK_READY;
+    pcb[1].priority=3;//priority=1/2/3
+    //printk("attr\n");
+    //special reg
+    pcb[1].user_context.cp0_status=0x10008000;
+    pcb[1].user_context.cp0_badvaddr=0;
+    pcb[1].user_context.cp0_cause=0;
+    pcb[1].user_context.cp0_epc=(uint32_t)&test_shell;
+    pcb[1].kernel_context.cp0_status=0x10008000;
+    pcb[1].kernel_context.cp0_badvaddr=0;
+    pcb[1].kernel_context.cp0_cause=0;
+    pcb[1].kernel_context.cp0_epc=(uint32_t)&test_shell;
+    //push to ready_queue
+    queue_push(ready_queue_array+2,pcb+1)
+    //update next pid
+    next_pid=2;
 }
 
 static void init_exception_handler()
@@ -187,7 +136,7 @@ static void init_syscall(void)
     syscall[SYSCALL_REFLUSH]=(int (*)())(&screen_reflush);
 
     //TODO:find the definition
-    syscall[SYSCALL_READ]=(int (*)())(/*TODO*/NULL);
+    syscall[SYSCALL_PROCESS_SHOW]=(int (*)())(&process_show);
 
     //defined in screen.c, used by sys_move_cursor
     syscall[SYSCALL_CURSOR]=(int (*)())(&screen_move_cursor);
@@ -217,6 +166,10 @@ void __attribute__((section(".entry_function"))) _start(void)
         int_time=0;
         int_handle_time=0;
 	// init Process Control Block (-_-!)
+	// init interrupt (^_^)
+	init_exception();
+	printk("> [INIT] Interrupt processing initialization succeeded temp.\n");
+        //open_int();
 	init_pcb();
 	printk("> [INIT] PCB initialization succeeded.\n");
 
@@ -234,7 +187,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 
 	// TODO Enable interrupt
 	open_int();
-        //printk(":-)\n");
+        printk(":-)\n");
         reset_timer();
 	while (1)
 	{
@@ -246,6 +199,27 @@ void __attribute__((section(".entry_function"))) _start(void)
 	};
         //printk(":-(\n");
 	return;
+}
+
+void process_show(void){
+    printf("[PROCESS TABLE]\n");
+    //perhaps need to go through the whole PCB table, because some processes may quit, producing 
+    //blanks in the PCB table
+    int i;
+    int process_num=0;
+    for(i=1;i<NUM_MAX_TASK;i++){
+        if(pcb[i].status!=5){
+            printf("[%d] PID:%d STATUS: ", process_num++,pcb[i].pid);
+            switch(pcb[i].status){
+                case 0: printf("BLOCKED\n");    break;
+                case 1: printf("RUNNING\n");    break;
+                case 2: printf("READY\n");    break;
+                case 3: printf("EXITED\n");    break;
+                case 4: printf("SLEEPING\n");    break;
+                default: printf("WRONG! UNKNOWN\n");
+            }
+        }
+    }
 }
 
 void stop_here(void){
@@ -263,8 +237,8 @@ void show_handle_int(void){
 }
 
 void show_error(void){
- //   printk("error:beq not true,CP0_CAUSE is %d\n",get_CP0_CAUSE());
- //   printk("EPC:%x\n",get_EPC());
+    printk("error:beq not true,CP0_CAUSE is %d\n",get_CP0_CAUSE());
+    printk("EPC:%x\n",get_EPC());
     stop_here();
 }
 

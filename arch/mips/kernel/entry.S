@@ -184,9 +184,15 @@ exception_handler_begin:
     andi k0,0x000007c
     //k0 only have ExCode
     or k1,$0,$0//perhaps use li looks little better
-    beq k0,k1,handle_int
+    bne k0,k1,1f
+    la k1,handle_int
+    jr k1
+1:
     li k1, 0x20
-    beq k0, k1, handle_syscall
+    bne k0, k1, 1f
+    la k1, handle_syscall
+    jr k1
+1:
     jal show_error
     //in fact always jump to handle_int, because now all exceptions are interrupt
     // Leve2 exception Handler.

@@ -53,15 +53,16 @@ typedef struct regs_context
 
 } regs_context_t; /* 128 + 28 = 156B */
 
-typedef enum {
+typedef enum {//don't change the order
     TASK_BLOCKED,
     TASK_RUNNING,
     TASK_READY,
     TASK_EXITED,
     TASK_SLEEPING,
+    TASK_NOT_EXIST,
 } task_status_t;
 
-typedef enum {
+typedef enum {//don't change the order
     KERNEL_PROCESS,
     KERNEL_THREAD,
     USER_PROCESS,
@@ -106,6 +107,7 @@ typedef struct pcb
 /* task information, used to init PCB */
 typedef struct task_info
 {
+    char name[10];
     uint32_t entry_point;
     task_type_t type;
 } task_info_t;

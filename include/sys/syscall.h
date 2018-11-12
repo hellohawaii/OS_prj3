@@ -47,6 +47,8 @@
 #define SYSCALL_CURSOR 22
 #define SYSCALL_REFLUSH 23
 
+#define SYSCALL_PROCESS_SHOW 29
+
 #define SYSCALL_MUTEX_LOCK_INIT 30
 #define SYSCALL_MUTEX_LOCK_ACQUIRE 31
 #define SYSCALL_MUTEX_LOCK_RELEASE 32
@@ -66,6 +68,8 @@ void sys_unblock_all(queue_t *);
 void sys_write(char *);
 void sys_move_cursor(int, int);
 void sys_reflush();
+
+void sys_process_show();
 
 void mutex_lock_init(mutex_lock_t *);
 void mutex_lock_acquire(mutex_lock_t *);

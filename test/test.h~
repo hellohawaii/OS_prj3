@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * *
  *            Copyright (C) 2018 Institute of Computing Technology, CAS
  *               Author : Han Shukai (email : hanshukai@ict.ac.cn)
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * * * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * *
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,26 +23,22 @@
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * */
 
-#ifndef INCLUDE_TYPE_H_
-#define INCLUDE_TYPE_H_
+#ifndef INCLUDE_TEST_H_
+#define INCLUDE_TEST_H_
 
-#ifndef NULL
-	#define NULL 	0
-#endif
+#include "test3.h"
+#include "test2.h"
+#include "sched.h"
 
-#ifndef TRUE
-	#define TRUE 	1
-	#define FALSE 	0
-#endif
+extern struct task_info *sched1_tasks[16];
+extern int num_sched1_tasks;
 
-typedef char int8_t;
-typedef unsigned char uint8_t;
-typedef short int16_t;
-typedef unsigned short uint16_t;
-typedef int int32_t;
-typedef unsigned int uint32_t;
-typedef long long int64_t;
-typedef unsigned long long uint64_t;
-typedef int pid_t;
+extern struct task_info *lock_tasks[16];
+extern int num_lock_tasks;
 
+extern struct task_info *timer_tasks[16];
+extern int num_timer_tasks;
+
+extern struct task_info *sched2_tasks[16];
+extern int num_sched2_tasks;
 #endif

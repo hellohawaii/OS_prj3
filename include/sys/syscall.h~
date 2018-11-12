@@ -1,7 +1,9 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * *
  *            Copyright (C) 2018 Institute of Computing Technology, CAS
  *               Author : Han Shukai (email : hanshukai@ict.ac.cn)
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * * * 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * *
+ *                       System call related processing
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * *
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,26 +25,53 @@
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * * */
 
-#ifndef INCLUDE_TYPE_H_
-#define INCLUDE_TYPE_H_
+#ifndef INCLUDE_SYSCALL_H_
+#define INCLUDE_SYSCALL_H_
 
-#ifndef NULL
-	#define NULL 	0
-#endif
+#include "type.h"
+#include "sync.h"
+#include "queue.h"
 
-#ifndef TRUE
-	#define TRUE 	1
-	#define FALSE 	0
-#endif
+#define IGNORE 0
+#define NUM_SYSCALLS 64
 
-typedef char int8_t;
-typedef unsigned char uint8_t;
-typedef short int16_t;
-typedef unsigned short uint16_t;
-typedef int int32_t;
-typedef unsigned int uint32_t;
-typedef long long int64_t;
-typedef unsigned long long uint64_t;
-typedef int pid_t;
+/* define */
+#define SYSCALL_SLEEP 2
+
+#define SYSCALL_BLOCK 10
+#define SYSCALL_UNBLOCK_ONE 11
+#define SYSCALL_UNBLOCK_ALL 12
+
+#define SYSCALL_WRITE 20
+#define SYSCALL_READ 21
+#define SYSCALL_CURSOR 22
+#define SYSCALL_REFLUSH 23
+
+#define SYSCALL_PROCESS_SHOW 29
+#define SYSCALL_MUTEX_LOCK_INIT 30
+#define SYSCALL_MUTEX_LOCK_ACQUIRE 31
+#define SYSCALL_MUTEX_LOCK_RELEASE 32
+
+/* syscall function pointer */
+int (*syscall[NUM_SYSCALLS])();
+
+void system_call_helper(int, int, int, int);
+extern int invoke_syscall(int, int, int, int);
+
+void sys_sleep(uint32_t);
+
+void sys_block(queue_t *);
+void sys_unblock_one(queue_t *);
+void sys_unblock_all(queue_t *);
+
+void sys_write(char *);
+void sys_move_cursor(int, int);
+void sys_reflush();
+
+void sys_process_show();
+
+void mutex_lock_init(mutex_lock_t *);
+void mutex_lock_acquire(mutex_lock_t *);
+void mutex_lock_release(mutex_lock_t *);
 
 #endif

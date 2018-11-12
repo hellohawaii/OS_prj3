@@ -52,6 +52,10 @@ void sys_move_cursor(int x, int y)
     invoke_syscall(SYSCALL_CURSOR, x, y, IGNORE);
 }
 
+void sys_process_show(){
+    invoke_syscall(SYSCALL_PROCESS_SHOW, IGNORE, IGNORE, IGNORE);
+}
+
 void mutex_lock_init(mutex_lock_t *lock)
 {
     invoke_syscall(SYSCALL_MUTEX_LOCK_INIT, (int)lock, IGNORE, IGNORE);
@@ -65,4 +69,56 @@ void mutex_lock_acquire(mutex_lock_t *lock)
 void mutex_lock_release(mutex_lock_t *lock)
 {
     invoke_syscall(SYSCALL_MUTEX_LOCK_RELEASE, (int)lock, IGNORE, IGNORE);
+}
+
+void sys_spawn(/*TODO*/)
+{
+
+}
+void sys_kill(/*TODO*/)
+{
+
+}
+
+void sys_exit(/*TODO*/)
+{
+
+}
+
+void sys_waitpid(/*TODO*/)
+{
+
+}
+
+void sys_getpid(/*TODO*/)
+{
+//TODO do not know where it is used
+}
+
+void semaphore_init(/*TODO*/){
+
+}
+
+void semaphore_up(/*TODO*/){
+
+}
+
+void semaphore_down(/*TODO*/){
+
+}
+
+void barrier_init(/*TODO*/){
+
+}
+
+void barrier_wait(/*TODO*/){
+
+}
+
+void condition_wait(/*TODO*/){
+
+}
+
+void condition_broadcast(/*TODO*/){
+
 }
