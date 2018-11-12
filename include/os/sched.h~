@@ -32,7 +32,7 @@
 #include "type.h"
 #include "queue.h"
 
-#define NUM_MAX_TASK 16
+#define NUM_MAX_TASK 5
 
 /* used to save register infomation */
 typedef struct regs_context
@@ -107,7 +107,7 @@ typedef struct pcb
 /* task information, used to init PCB */
 typedef struct task_info
 {
-    const char name[10];
+    char name[10];
     uint32_t entry_point;
     task_type_t type;
 } task_info_t;

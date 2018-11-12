@@ -202,7 +202,8 @@ void __attribute__((section(".entry_function"))) _start(void)
 }
 
 void process_show(void){
-    printk("[PROCESS TABLE]\n");
+    //screen_cursor_y++;//TODO:do not know why
+    printk("\n\n[PROCESS TABLE]\n");
     //int closed, can not use syscall like printf?
     //perhaps need to go through the whole PCB table, because some processes may quit, producing 
     //blanks in the PCB table
@@ -210,6 +211,7 @@ void process_show(void){
     int process_num=0;
     for(i=1;i<NUM_MAX_TASK;i++){
         if(pcb[i].status!=5){
+            screen_cursor_y++;
             printk("[%d] PID:%d STATUS: ", process_num++,pcb[i].pid);//interrupt closed, so using printk. this is kernel func
             switch(pcb[i].status){
                 case 0: printk("BLOCKED\n");    break;
@@ -221,6 +223,7 @@ void process_show(void){
             }
         }
     }
+    screen_cursor_y++;
 }
 
 void stop_here(void){
