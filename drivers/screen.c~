@@ -119,10 +119,11 @@ void init_screen(void)
 
 // clear line1 to line2
 void screen_clear(int line1, int line2)//line num count from 0, count to SCREEN_HEIGHT(not included)
+                                       //clear from line1(included) and line2(included)
 {
     int i, j;
 
-    for (i = line1; i < SCREEN_HEIGHT && i<line2; i++)// I modify this func a little, teachers' codes here are wrong!
+    for (i = line1; i < SCREEN_HEIGHT && i<=line2; i++)// I modify this func a little, teachers' codes here are wrong!
     {
         for (j = 0; j < SCREEN_WIDTH; j++)
         {

@@ -66,3 +66,18 @@ char *strcpy(char *dest, char *src)
 
 	return tmp;
 }
+
+int streq(char *str1, char *str2)//whether two strings are equal
+{
+	while (*str1 && *str2 && (*str1 == *str2) && *str1!=0)
+	{
+            str1++;
+            str2++;
+	};
+
+	if (*str1 == '\0' && *str2 == '\0')
+	{
+		return 1;
+	}
+        return 0;
+}

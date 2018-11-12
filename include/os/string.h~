@@ -44,5 +44,4 @@ char *strcat(char *dest, char *src);
 
 int strlen(char *src);
 
-int streq(char *str1, char *str2);
 #endif

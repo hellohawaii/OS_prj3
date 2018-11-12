@@ -58,7 +58,7 @@ static void init_pcb()
     queue_init(&block_queue);
     //initial PCB table
     for(i=2;i<NUM_MAX_TASK;i++){
-        pcb[i].status=TASK_NOT_EXIST;
+        pcb[i].status=5;
     }
     //initial the shell process into pcb[1]
     //universal reg
@@ -202,21 +202,22 @@ void __attribute__((section(".entry_function"))) _start(void)
 }
 
 void process_show(void){
-    printf("[PROCESS TABLE]\n");
+    printk("[PROCESS TABLE]\n");
+    //int closed, can not use syscall like printf?
     //perhaps need to go through the whole PCB table, because some processes may quit, producing 
     //blanks in the PCB table
     int i;
     int process_num=0;
     for(i=1;i<NUM_MAX_TASK;i++){
         if(pcb[i].status!=5){
-            printf("[%d] PID:%d STATUS: ", process_num++,pcb[i].pid);
+            printk("[%d] PID:%d STATUS: ", process_num++,pcb[i].pid);//interrupt closed, so using printk. this is kernel func
             switch(pcb[i].status){
-                case 0: printf("BLOCKED\n");    break;
-                case 1: printf("RUNNING\n");    break;
-                case 2: printf("READY\n");    break;
-                case 3: printf("EXITED\n");    break;
-                case 4: printf("SLEEPING\n");    break;
-                default: printf("WRONG! UNKNOWN\n");
+                case 0: printk("BLOCKED\n");    break;
+                case 1: printk("RUNNING\n");    break;
+                case 2: printk("READY\n");    break;
+                case 3: printk("EXITED\n");    break;
+                case 4: printk("SLEEPING\n");    break;
+                default: printk("WRONG! UNKNOWN\n");
             }
         }
     }

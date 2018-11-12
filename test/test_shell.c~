@@ -108,21 +108,25 @@ void test_shell()
         char ch = read_uart_ch();
         open_int();
         
-        // read command
+        // read & show command
         // To show the command, need to write the command into new_screen;
-        if(ch=='8'){
-            p--;
-            *p=0;
-        }else{
-            *p=ch;//have put '\n' into buffer, this wil influence the implement of cmd_inter()
-            p++;
-        }
-        //show command
-        screen_write_ch(ch);//support '\n' and backspace
-                            //modify the screen_array
-        //sys_reflush();  //using sys call to reflush
+        if(ch==127){//my backspace seems to be 127(delete)
+            if(p>command_buffer){
+                p--;
+                *p=0;
+                screen_write_ch(ch);//support '\n' and backspace
+                                    //modify the screen_array
+                                    //TODO, package this func as a syscall
+            }
+        }else if(ch!=0){//when not typying, will get ch=0 constantly
+            if(ch!=13){
+                *p=ch;//not put '\n' into buffer, this wil influence the implement of cmd_inter()
+                p++;
+            }
+            screen_write_ch(ch);
+        }e
         //interprete command
-        if(ch=='\n'){
+        if(ch==13){
             cmd_inter();//do this after finishing print '\n'
             //clear buffer after interpreting cmd
             for(i=0;i<COMMAND_MAX_LEN;i++){
@@ -136,20 +140,20 @@ void test_shell()
 
 void cmd_inter(){
     int i;
-    if(strcmp(command_buffer,"ps\n")){
+    if(streq(command_buffer,"ps")==1){
         sys_process_show();
         return;
-    }else if(strcmp(command_buffer,"clear\n")){
-        screen_clear(SHELL_START_LINE,SCREEN_HEIGHT-1);
+    }else if(streq(command_buffer,"clear")){
+        screen_clear(SHELL_START_LINE+1,SCREEN_HEIGHT-1);
         //SHELL_START_LINE is the cursor location of "-----command----"
-        //cursor location start from 1, but line number used by screen clear start from 0
+        //cursor location start from 0, and line number used by screen clear start from 0, too.
         sys_move_cursor(0, SHELL_START_LINE+1);
         return;
-    }else if(strcmp(command_buffer,"help\n")){
+    }else if(streq(command_buffer,"help")){
         printf("'ps' show all processes\n");
         printf("'clear' clear the command area\n");
         return;
-    }else if(strcmp(command_buffer,"\n")){
+    }else if(streq(command_buffer,"")){
         return;
     }else{
         printf("Unknown command, using 'help' for help\n");

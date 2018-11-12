@@ -2,6 +2,7 @@
 #include "time.h"
 #include "sched.h"
 #include "string.h"
+#include "screen.h"
 
 static void irq_timer()
 {
@@ -10,7 +11,7 @@ static void irq_timer()
     //show_handle_int();
     do_scheduler();
     time_elapsed+=100000;
-    //screen_reflush();
+    screen_reflush();
     return;
 }
 
