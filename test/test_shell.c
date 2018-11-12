@@ -120,7 +120,7 @@ void test_shell()
         //show command
         screen_write_ch(ch);//support '\n' and backspace
                             //modify the screen_array
-        //sys_reflush();  //using sys call to reflush
+        sys_reflush();  //using sys call to reflush
         //interprete command
         if(ch=='\n'){
             cmd_inter();//do this after finishing print '\n'
