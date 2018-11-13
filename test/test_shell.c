@@ -138,8 +138,29 @@ void test_shell()
     }
 }
 
+int get_para(char *str){
+    int result=0;
+    int digit;
+    char *p=str;
+    for(;*p!=0;p++){
+        digit=*p-48;
+        if(digit<0 || digit>9){//invalid input, return -1
+            return -1;
+        }else{
+            result=result*10+digit;
+        }
+    }
+    return result;
+}
+
 void cmd_inter(){
     int i;
+    char cmd4_without_para[6];//take part of command, used for recognize kill/exec
+    for(i=0;i<5;i++){
+        cmd4_without_para[i]=command_buffer[i];
+    }
+    cmd4_without_para[5]=0;
+    int para=get_para(command_buffer+i);//convert from string to integer
     if(streq(command_buffer,"ps")==1){
         sys_process_show();
         return;
@@ -149,13 +170,32 @@ void cmd_inter(){
         //cursor location start from 0, and line number used by screen clear start from 0, too.
         sys_move_cursor(0, SHELL_START_LINE+1);
         return;
+    }else if(streq(cmd4_without_para,"exec")){
+        if(para=-1){
+            printf("invalid parameter!\n");
+            return;
+        }else{
+            printf("exec process[%d]\n",para);
+            sys_spawn(test_tasks[para]->entry_point,test_tasks[para]->type,test_tasks[para]->name);
+            return;
+        }
+    }else if(streq(cmd4_without_para,"kill")){
+        if(para=-1){
+            printf("invalid parameter!\n");
+            return;
+        }else{
+            printf("kill process pid=%d\n",para);
+            sys_kill(para);
+            return;
+        }
     }else if(streq(command_buffer,"help")){
         printf("'ps' show all processes\n");
         printf("'clear' clear the command area\n");
         return;
-    }else if(streq(command_buffer,"")){
+    }else if(streq(command_buffer,"")){//just type enter, will reach here. do nothing.
         return;
     }else{
         printf("Unknown command, using 'help' for help\n");
     }
 }
+
