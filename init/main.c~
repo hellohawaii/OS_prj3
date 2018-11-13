@@ -50,6 +50,7 @@ int histotical_num;  //the number of processes(including the processes no longer
 static void init_pcb()
 {
     int i;
+    int j;
     //initial current_running here
     current_running=pcb;
     //initial queues;
@@ -57,7 +58,6 @@ static void init_pcb()
         queue_init(ready_queue_array+i);
     }
     queue_init(&sleep_queue);
-    queue_init(&block_queue);
     //initial PCB table
     for(i=2;i<NUM_MAX_TASK;i++){
         pcb[i].status=5;
@@ -75,6 +75,8 @@ static void init_pcb()
     pcb[1].status=TASK_READY;
     pcb[1].priority=3;//priority=1/2/3
     queue_init(&(pcb[1].waiting_queue));
+    for(j=0;j<MAX_MUTEX_OWN;j++)
+        (pcb[1].lock_owned)[i]=NULL;
     //printk("attr\n");
     //special reg
     pcb[1].user_context.cp0_status=0x10008000;
@@ -236,6 +238,7 @@ void process_show(void){
 
 void do_spwan(uint32_t entry, task_type_t type, char * name){//TODO : not sure about the parameter order
     int i;
+    int j;
     //fine the spare space in PCB table
     for(i=2;i<NUM_MAX_TASK && pcb[i].STATUS!=TASK_NOT_EXIST;i++){
         ;
@@ -254,6 +257,8 @@ void do_spwan(uint32_t entry, task_type_t type, char * name){//TODO : not sure a
     pcb[i].status=TASK_READY;
     pcb[i].priority=1;//priority=1/2/3
     queue_init(&(pcb[i].waiting_queue));
+    for(j=0;j<MAX_MUTEX_OWN;j++)
+        (pcb[i].lock_owned)[j]=NULL;
     //printk("attr\n");
     //special reg
     pcb[i].user_context.cp0_status=0x10008000;
@@ -268,6 +273,8 @@ void do_spwan(uint32_t entry, task_type_t type, char * name){//TODO : not sure a
     queue_push(ready_queue_array,pcb+i);
     //update histotical_num
     histotical_num++;
+    //TODO,not sure
+    do_scheduler();
 }
 
 void do_wait(pid_t pid){

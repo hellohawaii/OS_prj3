@@ -28,6 +28,8 @@
 #ifndef INCLUDE_LOCK_H_
 #define INCLUDE_LOCK_H_
 
+#define MAX_MUTEX_OWN 5
+
 #include "queue.h"
 
 typedef enum {
@@ -43,6 +45,8 @@ typedef struct spin_lock
 typedef struct mutex_lock
 {
     lock_status_t status;
+    pcb_t * owner;
+    queue_t block_queue;
 } mutex_lock_t;
 
 /* init lock */

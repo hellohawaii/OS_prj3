@@ -105,6 +105,9 @@ typedef struct pcb
 
     /*process waiting for this pcb*/
     queue_t waiting_queue;
+
+    /*the lock this process owns*/
+    mutex_lock *lock_owned[MAX_MUTEX_OWN];
 } pcb_t;
 
 /* task information, used to init PCB */
