@@ -45,7 +45,8 @@ typedef struct spin_lock
 typedef struct mutex_lock
 {
     lock_status_t status;
-    pcb_t * owner;
+    pid_t owner;//can not declare to be pcb_t *, because in the definition of pcb_t, they need the definition of mutex lock too
+              //If using pcb_t *, there will be a loop in type define.
     queue_t block_queue;
 } mutex_lock_t;
 

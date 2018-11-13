@@ -31,6 +31,7 @@
 
 #include "type.h"
 #include "queue.h"
+#include "lock.h"
 
 #define NUM_MAX_TASK 16
 #define NAME_LEN 10
@@ -110,11 +111,11 @@ typedef struct pcb
     pid_t waiting_pcb;//TODO:maybe I can use a better name to distinguish from the queue of other processes waiting for this pcb
 
     /*the lock this process waiting for*/
-    mutex_lock *lock_waiting;
+    mutex_lock_t *lock_waiting;//TODO:WHY DO I NEED TO USE STRUCT
 
     /*the lock this process owns*/
     /*just a copy of the pointers pointing to the mutex lock*/
-    mutex_lock *lock_owned[MAX_MUTEX_OWN];
+    mutex_lock_t * lock_owned[MAX_MUTEX_OWN];//TODO:WHY DO I NEED TO USE STRUCT
 } pcb_t;
 
 /* task information, used to init PCB */

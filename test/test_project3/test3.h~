@@ -2,6 +2,9 @@
 #define INCLUDE_TASK3_H_
 
 #include "type.h"
+
+void test_shell();
+
 // [1-4]
 void ready_to_exit_task(void);
 void wait_lock_task();

@@ -31,6 +31,7 @@
 #include "type.h"
 #include "sync.h"
 #include "queue.h"
+#include "sched.h"
 
 #define IGNORE 0
 #define NUM_SYSCALLS 64
@@ -80,7 +81,7 @@ void mutex_lock_init(mutex_lock_t *);
 void mutex_lock_acquire(mutex_lock_t *);
 void mutex_lock_release(mutex_lock_t *);
 
-void sys_spawn(uint32_t entry, task_type_t type, char * name);
+void sys_spawn(task_info_t * exec_info);
 void sys_waitpid(pid_t pid);
 void sys_kill(pid_t pid);
 void sys_exit(void);

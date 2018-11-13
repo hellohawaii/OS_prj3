@@ -39,12 +39,16 @@ extern char new_screen[SCREEN_HEIGHT * SCREEN_WIDTH];
 extern char old_screen[SCREEN_HEIGHT * SCREEN_WIDTH];
 
 void process_show(void);
+void do_spawn(task_info_t * exec_info);
+void do_wait(pid_t pid);
+void do_kill(pid_t pid);
+void do_exit(void);
 
 int int_time;
 int int_handle_time;
 
 int next_pid;
-int histotical_num;  //the number of processes(including the processes no longer exist)
+int historical_num;  //the number of processes(including the processes no longer exist)
                      //help to advocate the memory
 
 static void init_pcb()
@@ -93,7 +97,7 @@ static void init_pcb()
     queue_push(ready_queue_array+2,pcb+1);
     //update next pid
     next_pid=2;
-    histotical_num=1;
+    historical_num=1;
 }
 
 static void init_exception_handler()
@@ -197,7 +201,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 
 	// init screen (QAQ)
 	init_screen();
-	printk("> [INIT] SCREEN initialization succeeded.\n");
+	//printk("> [INIT] SCREEN initialization succeeded.\n");
 
 	// TODO Enable interrupt
 	open_int();
@@ -240,14 +244,17 @@ void process_show(void){
     screen_cursor_y++;
 }
 
-void do_spwan(uint32_t entry, task_type_t type, char * name){//TODO : not sure about the parameter order
+void do_spawn(task_info_t * exec_info){//TODO : not sure about the parameter order
+    uint32_t entry=exec_info->entry_point;
+    task_type_t type=exec_info->type;
+    char *name=exec_info->name;
     int i;
     int j;
     //fine the spare space in PCB table
-    for(i=2;i<NUM_MAX_TASK && pcb[i].STATUS!=TASK_NOT_EXIST;i++){
+    for(i=2;i<NUM_MAX_TASK && pcb[i].status!=TASK_NOT_EXIST;i++){
         ;
     }
-    if(i=NUM_MAX_TASK){
+    if(i==NUM_MAX_TASK){
         printk("TOO MANY TASKS");
     }
     //universal reg
@@ -274,17 +281,17 @@ void do_spwan(uint32_t entry, task_type_t type, char * name){//TODO : not sure a
     pcb[i].kernel_context.cp0_status=0x10008000;
     pcb[i].kernel_context.cp0_badvaddr=0;
     pcb[i].kernel_context.cp0_cause=0;
-    pcb[i].kernel_context.cp0_epc=test_shell;
+    pcb[i].kernel_context.cp0_epc=entry;
     //push to ready_queue
     queue_push(ready_queue_array,pcb+i);
     //update histotical_num
-    histotical_num++;
+    historical_num++;
     //TODO,not sure
     do_scheduler();
 }
 
 void do_wait(pid_t pid){
-    current_running->STATUS=BLOCKED;
+    current_running->status=TASK_BLOCKED;
     //find the location of pid in the pcb table, same as do_kill
     int i;
     for(i=2;i<NUM_MAX_TASK;i++){
@@ -312,14 +319,14 @@ void do_kill(pid_t pid){
         printk("No process with pid=%d\n",pid);
     }
     //remove from queues, TODO
-    if(pcb[i].STATUS==TASK_READY){
+    if(pcb[i].status==TASK_READY){
         //we can using the priority attribute
-        for(temp_pcb=(ready_queue_array+pcb[i].prioriy-1)->head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
+        for(temp_pcb=(ready_queue_array+pcb[i].priority-1)->head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
             if((((pcb_t *)temp_pcb)->pid) == pid){
-                queue_remove(ready_queue_array+pcb[i].prioriy-1, temp_pcb);
+                queue_remove(ready_queue_array+pcb[i].priority-1, temp_pcb);
             }		
         }
-    }else if(pcb[i].STATUS==TASK_BLOCKED){
+    }else if(pcb[i].status==TASK_BLOCKED){
         //There are two possible situation resulting into being blocked
         //the process is killed, so no longer waits for the lock/process
         //waiting for a mutex
@@ -355,17 +362,22 @@ void do_kill(pid_t pid){
             printk("Unknown block reason");
             while(1);
         }
-    }else if(pcb[i].STATUS==TASK_SLEEPING){
-
+    }else if(pcb[i].status==TASK_SLEEPING){
+        for(temp_pcb=sleep_queue.head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
+            if((((pcb_t *)temp_pcb)->pid) == pid){
+                queue_remove(&sleep_queue, temp_pcb);
+            }		
+        }
     }
     //change status. do this after removing from queues
-    pcb[i].STATUS=TASK_NOT_EXIST;
+    pcb[i].status=TASK_NOT_EXIST;
     //wake up processes waiting for him
-    //change the waiting pcb of process int he waiting queue;
-    for(temp_pcb=(current_running->waiting_queue).head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
-        ((pcb_t *)temp_pcb)->waiting_pcb=-1//-1 means waiting for nothing
+    //change the waiting pcb of process in the waiting queue;
+    //using pcb[i] instead of current_running
+    for(temp_pcb=(pcb[i].waiting_queue).head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
+        ((pcb_t *)temp_pcb)->waiting_pcb=-1;//-1 means waiting for nothing
     }
-    do_unblock_all(&(current_running->waiting_queue));
+    do_unblock_all(&(pcb[i].waiting_queue));
     //release lock
     int j;
     for(j=0;j<MAX_MUTEX_OWN;j++){
@@ -378,13 +390,13 @@ void do_kill(pid_t pid){
 
 void do_exit(void){
     //change status
-    current_running->STATUS=TASK_NOT_EXIST;
+    current_running->status=TASK_NOT_EXIST;
     //remove from queues, fortunatly, current process doesn't belong to any queue
     //wake up processes waiting for him
     //change the waiting pcb of process int he waiting queue;
     void *temp_pcb;
     for(temp_pcb=(current_running->waiting_queue).head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
-        ((pcb_t *)temp_pcb)->waiting_pcb=-1//-1 means waiting for nothing
+        ((pcb_t *)temp_pcb)->waiting_pcb=-1;//-1 means waiting for nothing
     }
     do_unblock_all(&(current_running->waiting_queue));
     //release lock
