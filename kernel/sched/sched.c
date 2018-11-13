@@ -26,6 +26,7 @@ static void check_sleeping()
     while(p!=NULL){
         if(((pcb_t *)p)->alarm_time < get_timer()){
             nextp=queue_remove(&sleep_queue, p);
+            ((pcb_t *)p)->priority = 1;
             queue_push(ready_queue_array,p);//the newly waked up process is assumed to be highest priority
             p=nextp;
         }else{
@@ -52,7 +53,7 @@ void scheduler(void)
     //store old current_running
     int priority=((pcb_t *)current_running)->priority;
     ((pcb_t *)current_running)->priority=(priority<=2)?priority+1:3;
-    if(current_running!=pcb && (current_running->status)!=TASK_BLOCKED && (current_running->status)!=TASK_SLEEPING)//pcb[0] actually is not a process
+    if(current_running!=pcb && (current_running->status)!=TASK_BLOCKED && (current_running->status)!=TASK_SLEEPING) && (current_running->STATUS)!=TASK_NOT_EXIST/*after exit or kill oneself*/)//pcb[0] actually is not a process
         queue_push(ready_queue_array+((pcb_t *)current_running)->priority-1,current_running);//always think current is ready before do_scheduler
 
     //get new current_running
@@ -145,9 +146,10 @@ void do_block(queue_t *queue)
 void do_unblock_one(queue_t *queue)
 {
     // unblock the head task from the queue
-    //the new unblocked process is assumed to be highest priority
+    //the new unblocked process is assumed to be highest priority(1)
     void *temppcb=queue_dequeue(&block_queue);
     ((pcb_t *)temppcb)->status = TASK_READY;
+    ((pcb_t *)temppcb)->priority = 1;
     queue_push(ready_queue_array,temppcb);
     //don't forget to push into the ready queue
 }
@@ -156,10 +158,11 @@ void do_unblock_all(queue_t *queue)
 {
     void *temppcb=queue_dequeue(&block_queue);
     // unblock all task in the queue
-    //the new unblocked process is assumed to be highest priority
+    //the new unblocked process is assumed to be highest priority(1)
     while(!queue_is_empty(&block_queue)){
         //queue_push(ready_queue_array,queue_dequeue(&block_queue));
         ((pcb_t *)temppcb)->status = TASK_READY;
+        ((pcb_t *)temppcb)->priority = 1;
         queue_push(ready_queue_array,temppcb);
     }
 }

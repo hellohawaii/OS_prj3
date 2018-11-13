@@ -58,7 +58,7 @@ typedef enum {//don't change the order
     TASK_BLOCKED,
     TASK_RUNNING,
     TASK_READY,
-    TASK_EXITED,
+    TASK_EXITED,//is not used by my codes
     TASK_SLEEPING,
     TASK_NOT_EXIST,
 } task_status_t;
@@ -103,10 +103,17 @@ typedef struct pcb
     int cursor_x;
     int cursor_y;
 
-    /*process waiting for this pcb*/
+    /*other processes waiting for this pcb*/
     queue_t waiting_queue;
 
+    /*process this process is waiting for*/
+    pid_t waiting_pcb;//TODO:maybe I can use a better name to distinguish from the queue of other processes waiting for this pcb
+
+    /*the lock this process waiting for*/
+    mutex_lock *lock_waiting;
+
     /*the lock this process owns*/
+    /*just a copy of the pointers pointing to the mutex lock*/
     mutex_lock *lock_owned[MAX_MUTEX_OWN];
 } pcb_t;
 

@@ -55,6 +55,8 @@
 
 #define SYSCALL_SPAWN 40
 #define SYSCALL_WAITPID 41
+#define SYSCALL_KILL 42
+#define SYSCALL_EXIT 43
 
 /* syscall function pointer */
 int (*syscall[NUM_SYSCALLS])();
@@ -80,4 +82,6 @@ void mutex_lock_release(mutex_lock_t *);
 
 void sys_spawn(uint32_t entry, task_type_t type, char * name);
 void sys_waitpid(pid_t pid);
+void sys_kill(pid_t pid);
+void sys_exit(void);
 #endif

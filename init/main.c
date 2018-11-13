@@ -75,6 +75,8 @@ static void init_pcb()
     pcb[1].status=TASK_READY;
     pcb[1].priority=3;//priority=1/2/3
     queue_init(&(pcb[1].waiting_queue));
+    pcb[1].lock_waiting=NULL;
+    pcb[1].waiting_pcb = -1;//PCB=-1 mean not exist
     for(j=0;j<MAX_MUTEX_OWN;j++)
         (pcb[1].lock_owned)[j]=NULL;
     //printk("attr\n");
@@ -147,6 +149,8 @@ static void init_syscall(void)
     //defined in main.c
     syscall[SYSCALL_SPAWN]=(int (*)())(&do_spawn);
     syscall[SYSCALL_WAITPID]=(int (*)())(&do_wait);
+    syscall[SYSCALL_KILL]=(int (*)())(&do_kill);
+    syscall[SYSCALL_EXIT]=(int (*)())(&do_exit);
 
     //defined in screen.c, used by sys_move_cursor
     syscall[SYSCALL_CURSOR]=(int (*)())(&screen_move_cursor);
@@ -257,6 +261,8 @@ void do_spwan(uint32_t entry, task_type_t type, char * name){//TODO : not sure a
     pcb[i].status=TASK_READY;
     pcb[i].priority=1;//priority=1/2/3
     queue_init(&(pcb[i].waiting_queue));
+    pcb[i].lock_waiting=NULL;
+    pcb[i].waiting_pcb = -1;//PCB=-1 mean not exist
     for(j=0;j<MAX_MUTEX_OWN;j++)
         (pcb[i].lock_owned)[j]=NULL;
     //printk("attr\n");
@@ -279,7 +285,7 @@ void do_spwan(uint32_t entry, task_type_t type, char * name){//TODO : not sure a
 
 void do_wait(pid_t pid){
     current_running->STATUS=BLOCKED;
-    //find the location of pid in the pcb table
+    //find the location of pid in the pcb table, same as do_kill
     int i;
     for(i=2;i<NUM_MAX_TASK;i++){
         if(pcb[i].pid == pid)
@@ -291,6 +297,103 @@ void do_wait(pid_t pid){
     //push to the wait_queue
     //in the kill & exit func, do not forget to wait up waiting processes
     queue_push(&(pcb[i].waiting_queue),current_running);
+    do_scheduler();
+}
+
+void do_kill(pid_t pid){
+    //find the location of pid in the pcb table, same as do_wait
+    int i;
+    void *temp_pcb;
+    for(i=2;i<NUM_MAX_TASK;i++){
+        if(pcb[i].pid == pid)
+            break;
+    }
+    if(pcb[i].pid != pid){
+        printk("No process with pid=%d\n",pid);
+    }
+    //remove from queues, TODO
+    if(pcb[i].STATUS==TASK_READY){
+        //we can using the priority attribute
+        for(temp_pcb=(ready_queue_array+pcb[i].prioriy-1)->head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
+            if((((pcb_t *)temp_pcb)->pid) == pid){
+                queue_remove(ready_queue_array+pcb[i].prioriy-1, temp_pcb);
+            }		
+        }
+    }else if(pcb[i].STATUS==TASK_BLOCKED){
+        //There are two possible situation resulting into being blocked
+        //the process is killed, so no longer waits for the lock/process
+        //waiting for a mutex
+        if(pcb[i].lock_waiting != NULL){
+            //remove the killed process from block_queue
+            //need to search the queue.
+            for(temp_pcb=((pcb[i].lock_waiting)->block_queue).head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
+                if((((pcb_t *)temp_pcb)->pid) == pid){
+                    queue_remove(&((pcb[i].lock_waiting)->block_queue), temp_pcb);
+                }		
+            }
+        }else if(pcb[i].waiting_pcb!=-1){//waiting for a process
+            pid_t target_pcb=pcb[i].waiting_pcb;
+            //TODO:perhaps, if store the addr in pcb instead of pid, it will be better, do not need to search in the pcb table
+            //TODO:perhaps, package a function, search & remove the process with specific pid from the given queue.
+            //search the table to find the process
+            int j;
+            for(j=2;j<NUM_MAX_TASK;j++){
+                if(pcb[j].pid == target_pcb)
+                    break;
+            }
+            if(pcb[j].pid != target_pcb){
+                 printk("No process with pid=%d\n",target_pcb);
+            }
+            //remove the killed process from waiting_queue
+            //need to search the queue.
+            for(temp_pcb=(pcb[j].waiting_queue).head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
+                if((((pcb_t *)temp_pcb)->pid) == pid){
+                    queue_remove(&(pcb[j].waiting_queue), temp_pcb);
+                }		
+            }
+        }else{
+            printk("Unknown block reason");
+            while(1);
+        }
+    }else if(pcb[i].STATUS==TASK_SLEEPING){
+
+    }
+    //change status. do this after removing from queues
+    pcb[i].STATUS=TASK_NOT_EXIST;
+    //wake up processes waiting for him
+    //change the waiting pcb of process int he waiting queue;
+    for(temp_pcb=(current_running->waiting_queue).head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
+        ((pcb_t *)temp_pcb)->waiting_pcb=-1//-1 means waiting for nothing
+    }
+    do_unblock_all(&(current_running->waiting_queue));
+    //release lock
+    int j;
+    for(j=0;j<MAX_MUTEX_OWN;j++){
+        if((pcb[i].lock_owned)[j] != NULL){
+            do_mutex_lock_release((pcb[i].lock_owned)[j]);
+        }
+    }
+    do_scheduler();
+}
+
+void do_exit(void){
+    //change status
+    current_running->STATUS=TASK_NOT_EXIST;
+    //remove from queues, fortunatly, current process doesn't belong to any queue
+    //wake up processes waiting for him
+    //change the waiting pcb of process int he waiting queue;
+    void *temp_pcb;
+    for(temp_pcb=(current_running->waiting_queue).head;temp_pcb!=NULL;temp_pcb=(((pcb_t *)temp_pcb)->next)){
+        ((pcb_t *)temp_pcb)->waiting_pcb=-1//-1 means waiting for nothing
+    }
+    do_unblock_all(&(current_running->waiting_queue));
+    //release lock
+    int i;
+    for(i=0;i<MAX_MUTEX_OWN;i++){
+        if((current_running->lock_owned)[i] != NULL){
+            do_mutex_lock_release((current_running->lock_owned)[i]);
+        }
+    }
     do_scheduler();
 }
 

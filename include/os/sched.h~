@@ -103,11 +103,18 @@ typedef struct pcb
     int cursor_x;
     int cursor_y;
 
-    /*process waiting for this pcb*/
+    /*other processes waiting for this pcb*/
     queue_t waiting_queue;
 
+    /*process this process is waiting for*/
+    pid_t waiting_pcb;//TODO:maybe I can use a better name to distinguish from the queue of other processes waiting for this pcb
+
+    /*the lock this process waiting for*/
+    mutex_lock *lock_waiting;
+
     /*the lock this process owns*/
-    mutex_lock *a[MAX_MUTEX_OWN];
+    /*just a copy of the pointers pointing to the mutex lock*/
+    mutex_lock *lock_owned[MAX_MUTEX_OWN];
 } pcb_t;
 
 /* task information, used to init PCB */

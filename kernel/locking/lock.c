@@ -31,11 +31,14 @@ void do_mutex_lock_acquire(mutex_lock_t *lock)
 //I think this function is used by processes
 {
     while(lock->status==LOCKED){
+        current_running->lock_waiting=lock;
         do_block(&(lock->block_queue));
+        current_running->lock_waiting=lock;
         do_scheduler();
     }
     lock->status=LOCKED;
     lock->owner=current_running;
+    current_running->lock_waiting=NULL;
     //add the lock to the 'lock_owned' field
     int i;
     for(i=0;i<MAX_MUTEX_OWN;i++){

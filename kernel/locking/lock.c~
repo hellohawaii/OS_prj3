@@ -31,6 +31,7 @@ void do_mutex_lock_acquire(mutex_lock_t *lock)
 //I think this function is used by processes
 {
     while(lock->status==LOCKED){
+        current_running->lock_waiting=lock;
         do_block(&(lock->block_queue));
         do_scheduler();
     }

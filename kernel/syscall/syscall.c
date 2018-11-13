@@ -75,14 +75,15 @@ void sys_spawn(uint32_t entry, task_type_t type, char * name)
 {
     invoke_syscall(SYSCALL_SPAWN, uint32_t entry, task_type_t type, char * name);
 }
-void sys_kill(/*TODO*/)
-{
 
+void sys_kill(pid_t pid)
+{
+    invoke_syscall(SYSCALL_KILL, pid_t pid, IGNORE, IGNORE);
 }
 
-void sys_exit(/*TODO*/)
+void sys_exit(void)
 {
-
+    invoke_syscall(SYSCALL_EXIT, IGNORE, IGNORE, IGNORE);
 }
 
 void sys_waitpid(pid_t pid)
