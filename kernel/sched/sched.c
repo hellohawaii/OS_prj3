@@ -52,13 +52,15 @@ void scheduler(void)
     //store old current_running
     int priority=((pcb_t *)current_running)->priority;
     ((pcb_t *)current_running)->priority=(priority<=2)?priority+1:3;
-    if(current_running!=pcb && current_running!=block_queue.tail && current_running!=sleep_queue.tail)//pcb[0] actually is not a process
+    if(current_running!=pcb && (current_running->status)!=TASK_BLOCKED && (current_running->status)!=TASK_SLEEPING)//pcb[0] actually is not a process
         queue_push(ready_queue_array+((pcb_t *)current_running)->priority-1,current_running);//always think current is ready before do_scheduler
 
     //get new current_running
     current_running=(!queue_is_empty(ready_queue_array))?queue_dequeue(ready_queue_array):
         (!queue_is_empty(ready_queue_array+1))?queue_dequeue(ready_queue_array+1):
         queue_dequeue(ready_queue_array+2);
+    current_running->status=TASK_RUNNING;
+    process_id=current_running->pid;
     //printk("next pid%d",current_running->pid);
     //restore the cursor
     screen_cursor_x=current_running->cursor_x;
@@ -125,7 +127,7 @@ void scheduler(void)
 void do_sleep(uint32_t sleep_time)
 {
     // TODO sleep(seconds)
-    //current_running->status=TASK_SLEEPING;
+    current_running->status=TASK_SLEEPING;
     current_running->alarm_time=sleep_time+get_timer();//using get_timer(reduced time_elapsed)
     //using get_timer, this fit check_sleeping well
     //alarm time is reduced time (time_elapsed/10000000)
@@ -136,6 +138,7 @@ void do_sleep(uint32_t sleep_time)
 void do_block(queue_t *queue)
 {
     // block the current_running task into the queue
+    current_running->status=TASK_BLOCKED;
     queue_push(&block_queue,current_running);
 }
 
@@ -143,15 +146,21 @@ void do_unblock_one(queue_t *queue)
 {
     // unblock the head task from the queue
     //the new unblocked process is assumed to be highest priority
-    queue_push(ready_queue_array,queue_dequeue(&block_queue));
+    void *temppcb=queue_dequeue(&block_queue);
+    ((pcb_t *)temppcb)->status = TASK_READY;
+    queue_push(ready_queue_array,temppcb);
     //don't forget to push into the ready queue
 }
 
 void do_unblock_all(queue_t *queue)
 {
+    void *temppcb=queue_dequeue(&block_queue);
     // unblock all task in the queue
     //the new unblocked process is assumed to be highest priority
-    while(!queue_is_empty(&block_queue))
-        queue_push(ready_queue_array,queue_dequeue(&block_queue));
+    while(!queue_is_empty(&block_queue)){
+        //queue_push(ready_queue_array,queue_dequeue(&block_queue));
+        ((pcb_t *)temppcb)->status = TASK_READY;
+        queue_push(ready_queue_array,temppcb);
+    }
 }
 

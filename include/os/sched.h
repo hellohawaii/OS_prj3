@@ -33,6 +33,7 @@
 #include "queue.h"
 
 #define NUM_MAX_TASK 16
+#define NAME_LEN 10
 
 /* used to save register infomation */
 typedef struct regs_context
@@ -102,12 +103,14 @@ typedef struct pcb
     int cursor_x;
     int cursor_y;
 
+    /*process waiting for this pcb*/
+    queue_t waiting_queue;
 } pcb_t;
 
 /* task information, used to init PCB */
 typedef struct task_info
 {
-    char name[10];
+    char name[NAME_LEN];
     uint32_t entry_point;
     task_type_t type;
 } task_info_t;

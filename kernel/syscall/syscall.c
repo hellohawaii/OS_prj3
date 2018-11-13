@@ -71,9 +71,9 @@ void mutex_lock_release(mutex_lock_t *lock)
     invoke_syscall(SYSCALL_MUTEX_LOCK_RELEASE, (int)lock, IGNORE, IGNORE);
 }
 
-void sys_spawn(/*TODO*/)
+void sys_spawn(uint32_t entry, task_type_t type, char * name)
 {
-
+    invoke_syscall(SYSCALL_SPAWN, uint32_t entry, task_type_t type, char * name);
 }
 void sys_kill(/*TODO*/)
 {
@@ -85,9 +85,9 @@ void sys_exit(/*TODO*/)
 
 }
 
-void sys_waitpid(/*TODO*/)
+void sys_waitpid(pid_t pid)
 {
-
+    invoke_syscall(SYSCALL_WAITPID, pid_t pid, IGNORE, IGNORE);
 }
 
 void sys_getpid(/*TODO*/)

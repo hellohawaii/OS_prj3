@@ -53,6 +53,9 @@
 #define SYSCALL_MUTEX_LOCK_ACQUIRE 31
 #define SYSCALL_MUTEX_LOCK_RELEASE 32
 
+#define SYSCALL_SPAWN 40
+#define SYSCALL_WAITPID 41
+
 /* syscall function pointer */
 int (*syscall[NUM_SYSCALLS])();
 
@@ -75,4 +78,6 @@ void mutex_lock_init(mutex_lock_t *);
 void mutex_lock_acquire(mutex_lock_t *);
 void mutex_lock_release(mutex_lock_t *);
 
+void sys_spawn(uint32_t entry, task_type_t type, char * name);
+void sys_waitpid(pid_t pid);
 #endif
