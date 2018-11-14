@@ -14,7 +14,7 @@ struct task_info cc_task = {"CaoCao", (uint32_t)&CaoCao, USER_PROCESS};
 void SunQuan(void)
 {
     //debugging
-    printf("%d\n",current_running->pid);
+    //printf("%d\n",current_running->pid);
     mailbox_t *pub = mbox_open("SunQuan-Publish-PID");
     pid_t myPid = sys_getpid();
     
@@ -22,11 +22,11 @@ void SunQuan(void)
      * and once for the CaoCao */
 
     // sys_move_cursor(0, 0);
-    printf("SunQuan(%d): Hello, I am SunQuan          ", myPid);
-
+    //printf("SunQuan(%d): Hello, I am SunQuan          ", myPid);
+    //printf("%d",myPid);
     mbox_send(pub, &myPid, sizeof(pid_t));
     mbox_send(pub, &myPid, sizeof(pid_t));
-
+    printf("..%d..",pub->buffer);
     /* Find LiuBei's PID */
     mailbox_t *sub = mbox_open("LiuBei-Publish-PID");
 

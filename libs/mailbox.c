@@ -1,7 +1,7 @@
 #include "string.h"
 #include "mailbox.h"
 
-#define MAX_NUM_BOX 32
+#define MAX_NUM_BOX 5
 
 static mailbox_t mboxs[MAX_NUM_BOX];//a lot of mail box
 
@@ -51,7 +51,7 @@ mailbox_t *mbox_open(char *name)
     //change num_users
     (mboxs+i)->num_users++;//don't assign it to 1
     //debugging
-    printf("finish open mail box named %s",name);
+    //printf("finish open mail box named %s",name);
     return mboxs+i;
 }
 
@@ -78,13 +78,14 @@ void mbox_send(mailbox_t *mailbox, void *msg, int msg_length)
     //printf("want to send msg\n");
     mutex_lock_acquire(&(mailbox->lock_on_box));
     //debugging
-    printf("acquire lock(send)\n");
+    //printf("acquire lock(send)\n");
     int len_sent=0;//how long have been sent
     while(len_sent<msg_length){
         if(mailbox->space_used < mailbox->capacity){
             //printf("sending");
             //do not forget to signal not_empty
             (mailbox->buffer)[mailbox->space_used++/*using 'space_used' as the index*/] = *(((char *)msg+len_sent));//using space_used&len_sent as the index
+            //printf("\n.%c.",*(((char *)msg+len_sent)));
             //do not forget to change space_used
             len_sent++;
             if(mailbox->space_used==1){//just not empty

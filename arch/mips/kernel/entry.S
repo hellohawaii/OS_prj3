@@ -243,7 +243,8 @@ NESTED(handle_syscall, 0, sp)
     or v0,k0,zero
     //thanks to k0 which will not be changed by RESTORE_CONTEXT
 *///can not don like this, because k0 is used.
-    
+    RESTORE_CONTEXT(USER)
+
     //modify EPC
     mfc0 k0, CP0_EPC
     addiu k0, k0, 0x4

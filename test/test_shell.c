@@ -130,6 +130,7 @@ void test_shell()
     //initializition for test_sanguo.c
     //I think this should be done by test_sanguo.c
     mbox_init();
+    //printk("\n\n\n\nfinish init mboxs");
     //command_buffer[COMMAND_MAX_LEN];//initialize to avoid strange bugs
     int i;
     for(i=0;i<COMMAND_MAX_LEN;i++){

@@ -434,7 +434,7 @@ void do_exit(void){
 }
 
 int do_getpid(void){
-
+    return current_running->pid;
 }
 
 void stop_here(void){
