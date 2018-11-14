@@ -91,7 +91,24 @@ static int num_test_tasks = 15;
 char command_buffer[COMMAND_MAX_LEN]={0};
 void test_shell()
 {
-    command_buffer[COMMAND_MAX_LEN];//initialize to avoid strange bugs
+    //initial it manually
+    test_tasks[0]=&task1;
+    test_tasks[1]=&task2;
+    test_tasks[2]=&task3;
+    test_tasks[3]=&task4;
+    test_tasks[4]=&task5;
+    test_tasks[5]=&task6;
+    test_tasks[6]=&task7;
+    test_tasks[7]=&task8;
+    test_tasks[8]=&task9;
+    test_tasks[9]=&task10;
+    test_tasks[10]=&task11;
+    test_tasks[11]=&task12;
+    test_tasks[12]=&task13;
+    test_tasks[13]=&task14;
+    test_tasks[14]=&task15;
+    test_tasks[15]=NULL;
+    //command_buffer[COMMAND_MAX_LEN];//initialize to avoid strange bugs
     int i;
     for(i=0;i<COMMAND_MAX_LEN;i++){
         command_buffer[i]=0;
