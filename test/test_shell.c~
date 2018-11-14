@@ -92,6 +92,25 @@ char command_buffer[COMMAND_MAX_LEN]={0};
 void test_shell()
 {
     //initial it manually
+struct task_info task1 = {"task1", (uint32_t)&ready_to_exit_task, USER_PROCESS};
+struct task_info task2 = {"task2", (uint32_t)&wait_lock_task, USER_PROCESS};
+struct task_info task3 = {"task3", (uint32_t)&wait_exit_task, USER_PROCESS};
+
+struct task_info task4 = {"task4", (uint32_t)&semaphore_add_task1, USER_PROCESS};
+struct task_info task5 = {"task5", (uint32_t)&semaphore_add_task2, USER_PROCESS};
+struct task_info task6 = {"task6", (uint32_t)&semaphore_add_task3, USER_PROCESS};
+
+struct task_info task7 = {"task7", (uint32_t)&producer_task, USER_PROCESS};
+struct task_info task8 = {"task8", (uint32_t)&consumer_task1, USER_PROCESS};
+struct task_info task9 = {"task9", (uint32_t)&consumer_task2, USER_PROCESS};
+
+struct task_info task10 = {"task10", (uint32_t)&barrier_task1, USER_PROCESS};
+struct task_info task11 = {"task11", (uint32_t)&barrier_task2, USER_PROCESS};
+struct task_info task12 = {"task12", (uint32_t)&barrier_task3, USER_PROCESS};
+
+struct task_info task13 = {"SunQuan",(uint32_t)&SunQuan, USER_PROCESS};
+struct task_info task14 = {"LiuBei", (uint32_t)&LiuBei, USER_PROCESS};
+struct task_info task15 = {"CaoCao", (uint32_t)&CaoCao, USER_PROCESS};
     test_tasks[0]=&task1;
     test_tasks[1]=&task2;
     test_tasks[2]=&task3;

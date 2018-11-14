@@ -13,9 +13,9 @@ void barrier_task1(void)
     int i;
     int print_location = 0;
 
-    is_init=0;//modify this manually, because I can not initialize the is_init;
+    //is_init=0;//modify this manually, because I can not initialize the is_init;
     //so I have to run barrier_task1 before barrier_task2 & barrier_task3
-    num_task=3;
+
     if (!is_init)
     {
         is_init = 1;

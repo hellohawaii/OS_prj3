@@ -7,7 +7,6 @@ typedef struct barrier
 {
     int num_expected;//expect how many tasks to reach barrier
     int num_now;//how many task have reached the barrier
-    queue_t waiting_queue;
 } barrier_t;
 
 void do_barrier_init(barrier_t *, int);

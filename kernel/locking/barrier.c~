@@ -19,6 +19,6 @@ void do_barrier_wait(barrier_t *barrier)
         barrier->num_now=0;
         do_scheduler();
     }else{
-        printk("wrong while waiting!expected:%d,now:%d\n",barrier->num_expected,barrier->num_now);
+        printk("wrong while waiting!\n");
     }
 }
