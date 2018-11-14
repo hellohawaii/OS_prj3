@@ -127,6 +127,9 @@ void test_shell()
     test_tasks[13]=&task14;
     test_tasks[14]=&task15;
     test_tasks[15]=NULL;
+    //initializition for test_sanguo.c
+    //I think this should be done by test_sanguo.c
+    mbox_init();
     //command_buffer[COMMAND_MAX_LEN];//initialize to avoid strange bugs
     int i;
     for(i=0;i<COMMAND_MAX_LEN;i++){

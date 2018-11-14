@@ -63,8 +63,8 @@
 #define SYSCALL_SEM_UP 51
 #define SYSCALL_SEM_DOWN 52
 
-#define SYSCALL_BARRIAR_INIT 53
-#define SYSCALL_BARRIAR_WAIT 54
+#define SYSCALL_BARRIER_INIT 53
+#define SYSCALL_BARRIER_WAIT 54
 
 #define SYSCALL_COND_INIT 55
 #define SYSCALL_COND_WAIT 56
@@ -95,6 +95,7 @@ void mutex_lock_release(mutex_lock_t *);
 
 void sys_spawn(task_info_t * exec_info);
 void sys_waitpid(pid_t pid);
+int sys_getpid(void);//return int
 void sys_kill(pid_t pid);
 void sys_exit(void);
 

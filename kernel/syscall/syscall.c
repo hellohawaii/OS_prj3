@@ -9,8 +9,11 @@ void system_call_helper(int fn, int arg1, int arg2, int arg3)
     //printk("syscall num:%d\n",fn);
     // syscall[fn](arg1, arg2, arg3)
     //just need to call the function needed, just use fn (syscall number) to find the function needed in array syscall
-    if(fn >= 0 && fn <NUM_SYSCALLS)
-        syscall[fn](arg1, arg2, arg3);
+    int return_val;
+    if(fn >= 0 && fn <NUM_SYSCALLS){
+        return_val=(int)(syscall[fn](arg1, arg2, arg3));
+        current_running->user_context.regs[2] = return_val;//by referring to Xue Feng's code, write this line
+    }
     else{
         printk("invalid syscall number!\n");		
         while(1);
@@ -91,9 +94,12 @@ void sys_waitpid(pid_t pid)
     invoke_syscall(SYSCALL_WAITPID, pid, IGNORE, IGNORE);
 }
 
-void sys_getpid(/*TODO*/)
+int sys_getpid(void)
 {
-//TODO do not know where it is used
+    int c;
+    c = invoke_syscall(SYSCALL_GETPID, IGNORE, IGNORE, IGNORE);//at this time, v0 is return num, this is what we want;
+    //printk("\n\n\n\n\n\n\n\n\n%d\n\n",c);
+    return c;
 }
 
 void semaphore_init(semaphore_t *s, int val){

@@ -237,10 +237,12 @@ NESTED(handle_syscall, 0, sp)
     jal system_call_helper
     addiu sp,sp,16
 
+/*
     or k0,v0,zero
     RESTORE_CONTEXT(USER)
     or v0,k0,zero
     //thanks to k0 which will not be changed by RESTORE_CONTEXT
+*///can not don like this, because k0 is used.
     
     //modify EPC
     mfc0 k0, CP0_EPC

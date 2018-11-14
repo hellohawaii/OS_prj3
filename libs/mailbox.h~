@@ -3,7 +3,7 @@
 
 #include "cond.h"
 
-#define MAIL_BOX_NAME_LENGTH 30
+#define MAIL_BOX_NAME_LENGTH 20
 #define MAIL_CAPACITY 100
 typedef struct mailbox
 {

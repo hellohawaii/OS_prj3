@@ -47,6 +47,7 @@ void do_spawn(task_info_t * exec_info);
 void do_wait(pid_t pid);
 void do_kill(pid_t pid);
 void do_exit(void);
+int do_getpid(void);
 
 int int_time;
 int int_handle_time;
@@ -159,6 +160,7 @@ static void init_syscall(void)
     syscall[SYSCALL_WAITPID]=(int (*)())(&do_wait);
     syscall[SYSCALL_KILL]=(int (*)())(&do_kill);
     syscall[SYSCALL_EXIT]=(int (*)())(&do_exit);
+    syscall[SYSCALL_GETPID]=(int (*)())(&do_getpid);
 
     //defined in screen.c, used by sys_move_cursor
     syscall[SYSCALL_CURSOR]=(int (*)())(&screen_move_cursor);
@@ -429,6 +431,10 @@ void do_exit(void){
         }
     }
     do_scheduler();
+}
+
+int do_getpid(void){
+    return current_running->pid;
 }
 
 void stop_here(void){

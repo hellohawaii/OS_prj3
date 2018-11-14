@@ -22,7 +22,7 @@ void SunQuan(void)
      * and once for the CaoCao */
 
     // sys_move_cursor(0, 0);
-    printf("SunQuan(%d): Hello, I am SunQuan          ", myPid);
+    //printf("SunQuan(%d): Hello, I am SunQuan          ", myPid);
 
     mbox_send(pub, &myPid, sizeof(pid_t));
     mbox_send(pub, &myPid, sizeof(pid_t));
