@@ -73,7 +73,7 @@ void mutex_lock_release(mutex_lock_t *lock)
 
 void sys_spawn(task_info_t * exec_info)
 {
-    invoke_syscall(SYSCALL_SPAWN, (int)exec_info, IGNORE, IGNORE);
+    invoke_syscall(SYSCALL_SPAWN, (int)exec_info, IGNORE, IGNORE);//need convert to int
 }
 
 void sys_kill(pid_t pid)
@@ -96,30 +96,40 @@ void sys_getpid(/*TODO*/)
 //TODO do not know where it is used
 }
 
-void semaphore_init(/*TODO*/){
-
+void semaphore_init(semaphore_t *s, int val){
+    invoke_syscall(SYSCALL_SEM_INIT, s, val, IGNORE);
 }
 
-void semaphore_up(/*TODO*/){
-
+void semaphore_up(semaphore_t *s){
+    invoke_syscall(SYSCALL_SEM_UP, s, IGNORE, IGNORE);
 }
 
-void semaphore_down(/*TODO*/){
-
+void semaphore_down(semaphore_t *s){
+    invoke_syscall(SYSCALL_SEM_DOWN, s, IGNORE, IGNORE);
 }
 
-void barrier_init(/*TODO*/){
-
+void barrier_init(barrier_t *barrier, int goal){
+    invoke_syscall(SYSCALL_BARRIER_INIT, barrier, goal, IGNORE);
 }
 
-void barrier_wait(/*TODO*/){
-
+void barrier_wait(barrier_t *barrier){
+    invoke_syscall(SYSCALL_BARRIER_WAIT, barrier, IGNORE, IGNORE);
 }
 
-void condition_wait(/*TODO*/){
-
+void condition_init(condition_t *condition)
+{
+    invoke_syscall(SYSCALL_COND_INIT, condition, IGNORE, IGNORE);
 }
 
-void condition_broadcast(/*TODO*/){
+void condition_wait(mutex_lock_t *lock, condition_t *condition){
+    invoke_syscall(SYSCALL_COND_WAIT, lock, condition, IGNORE);
+}
 
+void condition_signal(condition_t *condition)
+{
+    invoke_syscall(SYSCALL_COND_SIGNAL, condition, IGNORE, IGNORE);
+}
+
+void condition_broadcast(condition_t *condition){
+    invoke_syscall(SYSCALL_COND_BROADCAST, condition, IGNORE, IGNORE);
 }

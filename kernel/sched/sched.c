@@ -27,6 +27,7 @@ static void check_sleeping()
         if(((pcb_t *)p)->alarm_time < get_timer()){
             nextp=queue_remove(&sleep_queue, p);
             ((pcb_t *)p)->priority = 1;
+            ((pcb_t *)p)->status = TASK_READY;
             queue_push(ready_queue_array,p);//the newly waked up process is assumed to be highest priority
             p=nextp;
         }else{

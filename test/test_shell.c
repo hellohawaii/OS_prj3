@@ -156,6 +156,7 @@ int get_para(char *str){
 }
 
 void cmd_inter(){
+    //printk("interpreting\n");
     int i;
     char cmd4_without_para[6];//take part of command, used for recognize kill/exec
     for(i=0;i<5;i++){
@@ -180,7 +181,9 @@ void cmd_inter(){
             printf("invalid parameter!\n");
             return;
         }else{
+            //printk("hi\n");
             printf("exec process[%d]\n",para);
+            //printk("bye");
             sys_spawn(test_tasks[para]);
             return;
         }

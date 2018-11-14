@@ -96,30 +96,40 @@ void sys_getpid(/*TODO*/)
 //TODO do not know where it is used
 }
 
-void semaphore_init(/*TODO*/){
-
+void semaphore_init(semaphore_t *s, int val){
+    invoke_syscall(SYSCALL_SEM_INIT, (int)s, val, IGNORE);
 }
 
-void semaphore_up(/*TODO*/){
-
+void semaphore_up(semaphore_t *s){
+    invoke_syscall(SYSCALL_SEM_UP, (int)s, IGNORE, IGNORE);
 }
 
-void semaphore_down(/*TODO*/){
-
+void semaphore_down(semaphore_t *s){
+    invoke_syscall(SYSCALL_SEM_DOWN, (int)s, IGNORE, IGNORE);
 }
 
-void barrier_init(/*TODO*/){
-
+void barrier_init(barrier_t *barrier, int goal){
+    invoke_syscall(SYSCALL_BARRIER_INIT, (int)barrier, goal, IGNORE);
 }
 
-void barrier_wait(/*TODO*/){
-
+void barrier_wait(barrier_t *barrier){
+    invoke_syscall(SYSCALL_BARRIER_WAIT, (int)barrier, IGNORE, IGNORE);
 }
 
-void condition_wait(/*TODO*/){
-
+void condition_init(condition_t *condition)
+{
+    invoke_syscall(SYSCALL_COND_INIT, (int)condition, IGNORE, IGNORE);
 }
 
-void condition_broadcast(/*TODO*/){
+void condition_wait(mutex_lock_t *lock, condition_t *condition){
+    invoke_syscall(SYSCALL_COND_WAIT, (int)lock, (int)condition, IGNORE);
+}
 
+void condition_signal(condition_t *condition)
+{
+    invoke_syscall(SYSCALL_COND_SIGNAL, (int)condition, IGNORE, IGNORE);
+}
+
+void condition_broadcast(condition_t *condition){
+    invoke_syscall(SYSCALL_COND_BROADCAST, (int)condition, IGNORE, IGNORE);
 }

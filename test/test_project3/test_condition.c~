@@ -91,7 +91,7 @@ void consumer_task2(void)
         mutex_lock_release(&mutex);
         i++;
         if(i>100){
-            i=0;
+            /i=0;
             sys_sleep(1);
         }
     }

@@ -9,7 +9,6 @@ void do_semaphore_init(semaphore_t *s, int val)
     }else{
         printk("wrong init value of semaphore\n");
     }
-}
 
 void do_semaphore_up(semaphore_t *s)
 {

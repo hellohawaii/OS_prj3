@@ -139,12 +139,12 @@ void test_shell()
 }
 
 int get_para(char *str){
-    printf("%s\n",str);
+    //printf("%s\n",str);
     int result=0;
     int digit;
     char *p=str;
     for(;*p!=0;p++){
-        printf("%d",*p);
+        //printf("%d",*p);
         digit=*p-48;
         if(digit<0 || digit>9){//invalid input, return -1
             return -1;
@@ -156,6 +156,7 @@ int get_para(char *str){
 }
 
 void cmd_inter(){
+    //printk("interpreting\n");
     int i;
     char cmd4_without_para[6];//take part of command, used for recognize kill/exec
     for(i=0;i<5;i++){
@@ -180,7 +181,9 @@ void cmd_inter(){
             printf("invalid parameter!\n");
             return;
         }else{
+            //printk("hi\n");
             printf("exec process[%d]\n",para);
+            printk("bye");
             sys_spawn(test_tasks[para]);
             return;
         }

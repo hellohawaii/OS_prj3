@@ -7,7 +7,7 @@
 typedef struct semaphore
 {
     int sem;
-    queue_t waiting_queue;//task waiting for this sem
+    queue_t 
 } semaphore_t;
 
 void do_semaphore_init(semaphore_t *, int);

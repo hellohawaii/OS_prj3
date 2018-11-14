@@ -16,7 +16,7 @@ void do_condition_wait(mutex_lock_t *lock, condition_t *condition)
         printk("Error, please acquire the lock before calling for condition_wait\n");
     }
     //body of this function
-    (condition->num_waiting)++;
+    condition->num_waiting++;
     do_block(&(condition->waiting_queue));
     do_mutex_lock_release(lock);
     do_scheduler();

@@ -33,6 +33,10 @@
 #include "syscall.h"
 
 #include "regs.h"
+
+#include "sem.h"
+#include "cond.h"
+#include "barrier.h"
 //#include "screen.h"
 /* screen buffer */
 extern char new_screen[SCREEN_HEIGHT * SCREEN_WIDTH];
@@ -164,6 +168,21 @@ static void init_syscall(void)
     syscall[SYSCALL_MUTEX_LOCK_INIT]=(int (*)())(&do_mutex_lock_init);
     syscall[SYSCALL_MUTEX_LOCK_ACQUIRE]=(int (*)())(&do_mutex_lock_acquire);
     syscall[SYSCALL_MUTEX_LOCK_RELEASE]=(int (*)())(&do_mutex_lock_release);
+
+    //defined in sem.c
+    syscall[SYSCALL_SEM_INIT]=(int (*)())(&do_semaphore_init);
+    syscall[SYSCALL_SEM_UP]=(int (*)())(&do_semaphore_up);
+    syscall[SYSCALL_SEM_DOWN]=(int (*)())(&do_semaphore_down);
+
+    //defined in barrier.c
+    syscall[SYSCALL_BARRIER_INIT]=(int (*)())(&do_barrier_init);
+    syscall[SYSCALL_BARRIER_WAIT]=(int (*)())(&do_barrier_wait);
+
+    //defined in cond.c
+    syscall[SYSCALL_COND_INIT]=(int (*)())(&do_condition_init);
+    syscall[SYSCALL_COND_WAIT]=(int (*)())(&do_condition_wait);
+    syscall[SYSCALL_COND_SIGNAL]=(int (*)())(&do_condition_signal);
+    syscall[SYSCALL_COND_BROADCAST]=(int (*)())(&do_condition_broadcast);
 } 
 
 // jump from bootloader.
@@ -256,6 +275,7 @@ void do_spawn(task_info_t * exec_info){//TODO : not sure about the parameter ord
     }
     if(i==NUM_MAX_TASK){
         printk("TOO MANY TASKS");
+        while(1);
     }
     //universal reg
     pcb[i].kernel_context.regs[29]=0xa0f00000+0x10000*(historical_num+1);//sp
@@ -308,6 +328,7 @@ void do_wait(pid_t pid){
 }
 
 void do_kill(pid_t pid){
+    //TODO:what if there are semaphore/conditional varible/barrier and so on?
     //find the location of pid in the pcb table, same as do_wait
     int i;
     void *temp_pcb;
@@ -389,6 +410,7 @@ void do_kill(pid_t pid){
 }
 
 void do_exit(void){
+    //TODO:what if there are semaphore/conditional varible/barrier and so on?
     //change status
     current_running->status=TASK_NOT_EXIST;
     //remove from queues, fortunatly, current process doesn't belong to any queue
