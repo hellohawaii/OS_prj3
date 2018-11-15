@@ -326,6 +326,8 @@ void do_wait(pid_t pid){
     //push to the wait_queue
     //in the kill & exit func, do not forget to wait up waiting processes
     queue_push(&(pcb[i].waiting_queue),current_running);
+    //change the waiting pcb, to record which pcb this process is waiting
+    current_running->waiting_pcb = pid;
     do_scheduler();
 }
 
