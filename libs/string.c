@@ -81,3 +81,27 @@ int streq(char *str1, char *str2)//whether two strings are equal
 	}
         return 0;
 }
+
+void strrev(char *msg, int msg_length){
+    char *p=msg;
+    char *q=msg+msg_length-1;
+    char temp;
+    /*debug
+    for(i=0;i<msg_length;i++){
+        printf("%c",(*(msg+i)-48));
+    }
+    printf("\n");
+    printf("\n");
+    */
+    for(;q>p;p++,q--){
+        temp=*p;
+        *p=*q;
+        *q=temp;
+    }
+    /*debug
+    for(i=0;i<msg_length;i++){
+        printf("%c",(*(msg+i)-48));
+    }
+    printf("\n");
+    */
+}

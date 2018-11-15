@@ -138,4 +138,6 @@ void mbox_recv(mailbox_t *mailbox, void *msg, int msg_length)
     mutex_lock_release(&(mailbox->lock_on_box));
     //debugging
     //printf("finish recieving msg\n");
+    strrev((char *)msg, msg_length);
+    //the received msg is the reverse of the sending msg because we use buffer as a stack
 }

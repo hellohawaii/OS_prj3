@@ -85,7 +85,7 @@ void mbox_send(mailbox_t *mailbox, void *msg, int msg_length)
             //printf("sending");
             //do not forget to signal not_empty
             (mailbox->buffer)[mailbox->space_used++/*using 'space_used' as the index*/] = *(((char *)msg+len_sent));//using space_used&len_sent as the index
-            printf("\n.%c.",*(((char *)msg+len_sent)));
+            //printf("\n.%c.",*(((char *)msg+len_sent)));
             //do not forget to change space_used
             len_sent++;
             if(mailbox->space_used==1){//just not empty
@@ -138,4 +138,5 @@ void mbox_recv(mailbox_t *mailbox, void *msg, int msg_length)
     mutex_lock_release(&(mailbox->lock_on_box));
     //debugging
     //printf("finish recieving msg\n");
+    strrev((char *)msg, msg_length);
 }
