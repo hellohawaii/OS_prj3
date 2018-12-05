@@ -45,6 +45,11 @@ void sys_write(char *buff)
     invoke_syscall(SYSCALL_WRITE, (int)buff, IGNORE, IGNORE);
 }
 
+void sys_write_ch(char c)
+{
+    invoke_syscall(SYSCALL_WRITE_CH, (int)c, IGNORE, IGNORE);
+}
+
 void sys_reflush()
 {
     invoke_syscall(SYSCALL_REFLUSH, IGNORE, IGNORE, IGNORE);

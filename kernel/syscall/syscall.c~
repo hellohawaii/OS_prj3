@@ -9,8 +9,9 @@ void system_call_helper(int fn, int arg1, int arg2, int arg3)
     //printk("syscall num:%d\n",fn);
     // syscall[fn](arg1, arg2, arg3)
     //just need to call the function needed, just use fn (syscall number) to find the function needed in array syscall
+    int return_val;
     if(fn >= 0 && fn <NUM_SYSCALLS){
-        int return_val=(int)(syscall[fn](arg1, arg2, arg3));
+        return_val=(int)(syscall[fn](arg1, arg2, arg3));
         current_running->user_context.regs[2] = return_val;//by referring to Xue Feng's code, write this line
     }
     else{
@@ -42,6 +43,11 @@ void sys_unblock_all(queue_t *queue)
 void sys_write(char *buff)
 {
     invoke_syscall(SYSCALL_WRITE, (int)buff, IGNORE, IGNORE);
+}
+
+void sys_write_ch(char *buff)
+{
+    invoke_syscall(SYSCALL_WRITE_CH, (int)buff, IGNORE, IGNORE);
 }
 
 void sys_reflush()

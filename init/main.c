@@ -151,6 +151,7 @@ static void init_syscall(void)
     //defined in screen.c, used by printf
     syscall[SYSCALL_WRITE]=(int (*)())(&screen_write);
     syscall[SYSCALL_REFLUSH]=(int (*)())(&screen_reflush);
+    syscall[SYSCALL_WRITE_CH]=(int (*)())(&screen_write_ch);
 
     //defined in main.c
     syscall[SYSCALL_PROCESS_SHOW]=(int (*)())(&process_show);

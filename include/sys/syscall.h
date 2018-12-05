@@ -47,6 +47,7 @@
 #define SYSCALL_READ 21
 #define SYSCALL_CURSOR 22
 #define SYSCALL_REFLUSH 23
+#define SYSCALL_WRITE_CH 24
 
 #define SYSCALL_PROCESS_SHOW 29
 
@@ -87,6 +88,7 @@ void sys_unblock_all(queue_t *);
 void sys_write(char *);
 void sys_move_cursor(int, int);
 void sys_reflush();
+void sys_write_ch(char c);
 
 void sys_process_show();
 

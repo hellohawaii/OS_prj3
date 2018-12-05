@@ -67,8 +67,8 @@ void screen_write_ch(char ch)
         screen_cursor_x = 0;
         screen_cursor_y++;
     }
-    else if (ch == 127) // backspace
-                        // modified, my backspace is 127
+    else if (ch == 8) // backspace
+                        // modified, my backspace is 127 on qume
     {
         if (screen_cursor_x > 0)
         {

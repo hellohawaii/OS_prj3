@@ -139,7 +139,11 @@ void test_shell()
     char *p=command_buffer;//point at free space
     //intialize the dividing line
     sys_move_cursor(0, SHELL_START_LINE);
-    printf("--------------COMMAND--------------\n");//this will stay there as long as not covered
+    printf("--------------COMMAND:-)--------------\n");//this will stay there as long as not covered
+    //printf("I want to printf more 1\n");
+    //printf("I want to printf more 2\n");
+    //printf("I want to printf more 3\n");
+    //printf("I want to printf more 4\n");
     printf(">root@UCAS_OS:");
     while (1)
     {
@@ -150,20 +154,24 @@ void test_shell()
         
         // read & show command
         // To show the command, need to write the command into new_screen;
-        if(ch==127){//my backspace seems to be 127(delete)
+        if(ch==8){//my backspace seems to be 127 on qume(delete)
             if(p>command_buffer){
                 p--;
                 *p=0;
                 screen_write_ch(ch);//support '\n' and backspace
                                     //modify the screen_array
                                     //TODO, package this func as a syscall
+                sys_reflush();
             }
         }else if(ch!=0){//when not typying, will get ch=0 constantly
             if(ch!=13){
                 *p=ch;//not put '\n' into buffer, this wil influence the implement of cmd_inter()
                 p++;
             }
+            //printf("%c",ch);
+            //printk("%c",ch);
             screen_write_ch(ch);
+            sys_reflush();
         }
         //interprete command
         if(ch==13){
@@ -174,6 +182,7 @@ void test_shell()
             }
             p=command_buffer;
             printf(">root@UCAS_OS:");
+            sys_reflush();
         }
     }
 }
@@ -206,6 +215,9 @@ void cmd_inter(){
     //printf("%s",cmd4_without_para);
     //printf("%s",command_buffer);
     //printf("%d",i);
+    //printf("interpreting1\n");
+    //printf("interpreting2\n");
+    //printf("interpreting3\n");
     int para=get_para(command_buffer+i);//convert from string to integer
     if(streq(command_buffer,"ps")==1){
         sys_process_show();
@@ -238,7 +250,9 @@ void cmd_inter(){
         }
     }else if(streq(command_buffer,"help")){
         printf("'ps' show all processes\n");
+        //printk("???what happened?");
         printf("'clear' clear the command area\n");
+        //printk("\n\n\ni don't know what happened");
         return;
     }else if(streq(command_buffer,"")){//just type enter, will reach here. do nothing.
         return;
