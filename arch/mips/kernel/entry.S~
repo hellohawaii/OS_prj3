@@ -243,7 +243,8 @@ NESTED(handle_syscall, 0, sp)
     or v0,k0,zero
     //thanks to k0 which will not be changed by RESTORE_CONTEXT
 *///can not don like this, because k0 is used.
-    
+    RESTORE_CONTEXT(USER)
+
     //modify EPC
     mfc0 k0, CP0_EPC
     addiu k0, k0, 0x4
@@ -264,6 +265,12 @@ LEAF(get_CP0_STATUS)
     mfc0 v0,CP0_STATUS
     jr ra
 END(get_CP0_STATUS)
+
+//this is used by dis/enable_interrupt by the the teacher
+LEAF(get_cp0_status)
+    mfc0 v0,CP0_STATUS
+    jr ra
+END(get_cp0_status)
 
 LEAF(get_CP0_COUNT)
     mfc0 v0,CP0_COUNT
@@ -320,6 +327,11 @@ LEAF(get_EPC)
     mfc0 v0,CP0_EPC
     jr ra
 END(get_EPC)
+
+LEAF(get_BadVaddr)
+    mfc0 v0,CP0_BADVADDR
+    jr ra
+END(get_BadVaddr)
 
 //LEAF(flag)
 //    jr ra

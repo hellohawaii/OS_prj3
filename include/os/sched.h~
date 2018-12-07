@@ -111,11 +111,11 @@ typedef struct pcb
     pid_t waiting_pcb;//TODO:maybe I can use a better name to distinguish from the queue of other processes waiting for this pcb
 
     /*the lock this process waiting for*/
-    struct mutex_lock_t *lock_waiting;//TODO:WHY DO I NEED TO USE STRUCT
+    mutex_lock_t *lock_waiting;//TODO:WHY DO I NEED TO USE STRUCT
 
     /*the lock this process owns*/
     /*just a copy of the pointers pointing to the mutex lock*/
-    struct mutex_lock_t * lock_owned[MAX_MUTEX_OWN];//TODO:WHY DO I NEED TO USE STRUCT
+    mutex_lock_t * lock_owned[MAX_MUTEX_OWN];//TODO:WHY DO I NEED TO USE STRUCT
 } pcb_t;
 
 /* task information, used to init PCB */

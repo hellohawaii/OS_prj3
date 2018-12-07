@@ -266,6 +266,12 @@ LEAF(get_CP0_STATUS)
     jr ra
 END(get_CP0_STATUS)
 
+//this is used by dis/enable_interrupt by the the teacher
+LEAF(get_cp0_status)
+    mfc0 v0,CP0_STATUS
+    jr ra
+END(get_cp0_status)
+
 LEAF(get_CP0_COUNT)
     mfc0 v0,CP0_COUNT
     jr ra
@@ -286,6 +292,12 @@ LEAF(set_CP0_STATUS)
     mtc0 a0,CP0_STATUS
     jr ra
 END(set_CP0_STATUS)
+
+//this is used by dis/enable_interrupt by the the teacher
+LEAF(set_cp0_status)
+    mtc0 a0,CP0_STATUS
+    jr ra
+END(set_cp0_status)
 
 LEAF(open_int)
     STI
@@ -321,6 +333,11 @@ LEAF(get_EPC)
     mfc0 v0,CP0_EPC
     jr ra
 END(get_EPC)
+
+LEAF(get_BadVaddr)
+    mfc0 v0,CP0_BADVADDR
+    jr ra
+END(get_BadVaddr)
 
 //LEAF(flag)
 //    jr ra

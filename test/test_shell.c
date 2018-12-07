@@ -34,7 +34,7 @@
 #define COMMAND_MAX_LEN 15
 
 void cmd_inter();
-/*
+
 static void disable_interrupt()
 {
     uint32_t cp0_status = get_cp0_status();
@@ -48,7 +48,7 @@ static void enable_interrupt()
     cp0_status |= 0x01;
     set_cp0_status(cp0_status);
 }
-*/
+
 static char read_uart_ch(void)
 {
     char ch = 0;
@@ -91,6 +91,11 @@ static int num_test_tasks = 15;
 char command_buffer[COMMAND_MAX_LEN]={0};
 void test_shell()
 {
+    //while(1){
+    //printk("test_shelling...");
+    //printf("enterring test_shell,shedule_time:%d",schedule_time);
+    //}
+    //while(1);
     //initial it manually
     struct task_info task1 = {"task1", (uint32_t)&ready_to_exit_task, USER_PROCESS};
     struct task_info task2 = {"task2", (uint32_t)&wait_lock_task, USER_PROCESS};
@@ -145,13 +150,18 @@ void test_shell()
     //printf("I want to printf more 3\n");
     //printf("I want to printf more 4\n");
     printf(">root@UCAS_OS:");
+
+    int test_shell_time=0;
+    //while(1);
     while (1)
     {
         // read command from UART port
-        close_int();
+        disable_interrupt();
         char ch = read_uart_ch();
-        open_int();
-        
+        //printk("test_shell%d",test_shell_time++);
+        enable_interrupt();
+
+        //while(1);
         // read & show command
         // To show the command, need to write the command into new_screen;
         if(ch==8){//my backspace seems to be 127 on qume(delete)
@@ -184,6 +194,7 @@ void test_shell()
             printf(">root@UCAS_OS:");
             sys_reflush();
         }
+
     }
 }
 

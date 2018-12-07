@@ -196,6 +196,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 	// when making the exception vector entry copy
 	asm_start();
         printk("hello OS!\n");
+        schedule_time=0;
         //old_screen[SCREEN_HEIGHT * SCREEN_WIDTH]={0};
         //new_screen[SCREEN_HEIGHT * SCREEN_WIDTH]={0};
         int i;
@@ -227,7 +228,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 
 	// TODO Enable interrupt
 	open_int();
-        printk(":-)\n");
+        //printk(":-)\n");
         reset_timer();
 	while (1)
 	{
@@ -455,7 +456,7 @@ void show_handle_int(void){
 }
 
 void show_error(void){
-    printk("error:beq not true,CP0_CAUSE is %d\n",get_CP0_CAUSE());
+    printk("error:beq not true,CP0_CAUSE is %d,badvaddr is %d\n",get_CP0_CAUSE(),get_BadVaddr());
     printk("EPC:%x\n",get_EPC());
     stop_here();
 }

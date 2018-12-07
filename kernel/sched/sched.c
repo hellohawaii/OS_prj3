@@ -38,11 +38,16 @@ static void check_sleeping()
     }
 }
 
+int schedule_time=0;
 void scheduler(void)
 {
      //save the cursor
     current_running->cursor_x=screen_cursor_x;
     current_running->cursor_y=screen_cursor_y;
+
+    //debugging
+    screen_move_cursor(0, 5);
+    //printk("\n\n\n\n\nsheduling_(%d)",schedule_time++);
 
     //do not forget to change the status of current_running
     if(current_running->status==TASK_RUNNING){//sometimes current_running here may be blocked and so on, so need a contion
@@ -128,6 +133,7 @@ void scheduler(void)
         printk("%d ",((pcb_t *)tempp)->pid);
     }
     */
+    //printk("quit scheduling%d",schedule_time);
 }
 
 void do_sleep(uint32_t sleep_time)
