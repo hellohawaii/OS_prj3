@@ -16,6 +16,11 @@ void producer_task(void)
     int production = 3;
     int sum_production = 0;
 
+    //seems to need initialization
+    mutex_lock_init(&mutex);
+    condition_init(&condition);
+    num_staff=0;
+
     for (i = 0; i < 5000; i++)
     {
         mutex_lock_acquire(&mutex);

@@ -16,6 +16,10 @@ void producer_task(void)
     int production = 3;
     int sum_production = 0;
 
+    //seems to need initialization
+    mutex_lock_init(&mutex);
+    condition_init(&condition);
+
     for (i = 0; i < 5000; i++)
     {
         mutex_lock_acquire(&mutex);
@@ -91,7 +95,7 @@ void consumer_task2(void)
         mutex_lock_release(&mutex);
         i++;
         if(i>100){
-            /i=0;
+            i=0;
             sys_sleep(1);
         }
     }

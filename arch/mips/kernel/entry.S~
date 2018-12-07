@@ -25,7 +25,7 @@
     mtc0 $0,CP0_COUNT
 */
     mtc0 $0,CP0_COUNT
-    add $26,$0,150000
+    add $26,$0,15000
     // 150000 is TIMER_INTERVAL
     //using large interval to show the progross
     //the default interval is 0x249f0
@@ -292,6 +292,12 @@ LEAF(set_CP0_STATUS)
     mtc0 a0,CP0_STATUS
     jr ra
 END(set_CP0_STATUS)
+
+//this is used by dis/enable_interrupt by the the teacher
+LEAF(set_cp0_status)
+    mtc0 a0,CP0_STATUS
+    jr ra
+END(set_cp0_status)
 
 LEAF(open_int)
     STI
