@@ -234,7 +234,7 @@ void cmd_inter(){
         sys_process_show();
         return;
     }else if(streq(command_buffer,"clear")){
-        screen_clear(SHELL_START_LINE+1,SCREEN_HEIGHT-1);
+        sys_clear(SHELL_START_LINE+1,SCREEN_HEIGHT-1);
         //SHELL_START_LINE is the cursor location of "-----command----"
         //cursor location start from 0, and line number used by screen clear start from 0, too.
         sys_move_cursor(0, SHELL_START_LINE+1);

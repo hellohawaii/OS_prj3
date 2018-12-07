@@ -55,6 +55,11 @@ void sys_reflush()
     invoke_syscall(SYSCALL_REFLUSH, IGNORE, IGNORE, IGNORE);
 }
 
+void sys_clear(int line1,int line2)
+{
+    invoke_syscall(SYSCALL_CLEAR, line1, line2, IGNORE);
+}
+
 void sys_move_cursor(int x, int y)
 {
     invoke_syscall(SYSCALL_CURSOR, x, y, IGNORE);

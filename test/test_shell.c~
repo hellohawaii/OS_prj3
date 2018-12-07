@@ -97,7 +97,6 @@ void test_shell()
     //}
     //while(1);
     //initial it manually
-    //while(1);
     struct task_info task1 = {"task1", (uint32_t)&ready_to_exit_task, USER_PROCESS};
     struct task_info task2 = {"task2", (uint32_t)&wait_lock_task, USER_PROCESS};
     struct task_info task3 = {"task3", (uint32_t)&wait_exit_task, USER_PROCESS};

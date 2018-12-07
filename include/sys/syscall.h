@@ -48,6 +48,7 @@
 #define SYSCALL_CURSOR 22
 #define SYSCALL_REFLUSH 23
 #define SYSCALL_WRITE_CH 24
+#define SYSCALL_CLEAR 25
 
 #define SYSCALL_PROCESS_SHOW 29
 
@@ -89,6 +90,7 @@ void sys_write(char *);
 void sys_move_cursor(int, int);
 void sys_reflush();
 void sys_write_ch(char c);
+void sys_clear(int line1, int line2);
 
 void sys_process_show();
 
