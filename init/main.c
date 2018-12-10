@@ -208,9 +208,6 @@ void __attribute__((section(".entry_function"))) _start(void)
         int_time=0;
         int_handle_time=0;
 	// init Process Control Block (-_-!)
-	// init interrupt (^_^)
-	init_exception();
-	printk("> [INIT] Interrupt processing initialization succeeded temp.\n");
         //open_int();
 	init_pcb();
 	printk("> [INIT] PCB initialization succeeded.\n");
